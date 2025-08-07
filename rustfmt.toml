@@ -1,0 +1,26 @@
+# Format string literals where necessary.
+format_strings = true
+
+# Group the imports by their kind: std first, then external crates, then local imports.
+group_imports = "One"
+
+# Use uppercase for hexadecimal literals.
+hex_literal_case = "Upper"
+
+# Only merge imports if they're from the same module.
+imports_granularity = "Module"
+
+# Put a trailing comma after the last item in a block if it is not empty.
+match_block_trailing_comma = true
+
+# Use Unix line endings.
+newline_style = "Unix"
+
+# Normalize comments to ensure consistent formatting.
+normalize_comments = true
+
+# Use the default edition for formatting.
+style_edition = "2024"
+
+# Number of spaces per tab.
+tab_spaces = 4
