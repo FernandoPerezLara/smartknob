@@ -1,0 +1,14 @@
+[build]
+target = "riscv32imac-unknown-none-elf"
+
+[target.riscv32imac-unknown-none-elf]
+linker = "ldproxy"
+rustflags = [
+  "--cfg",  "espidf_time64",
+  "-C", "link-arg=--ldproxy-linker",
+  "-C", "link-arg=rust-lld",
+]
+runner = "espflash flash --monitor"
+
+[unstable]
+build-std = [ "core" ]

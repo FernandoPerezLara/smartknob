@@ -4,3 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+embassy-executor = { version = "0.7.0", features = ["log", "task-arena-size-20480"] }
+embassy-time = "0.4.0"
+esp-backtrace = { version = "0.17.0", features = ["panic-handler", "println"] }
+esp-bootloader-esp-idf = { version = "0.2.0", features = ["esp32c6"] }
+esp-hal = { version = "1.0.0-rc.0", features = ["esp32c6", "unstable"] }
+esp-hal-embassy = { version = "0.9.0", features = ["esp32c6"] }
+esp-println = { version = "0.15.0", features = ["log-04"] }
+log = "0.4.27"
+
+[features]
+default = ["esp-hal/esp32c6", "esp-backtrace/esp32c6", "esp-println/esp32c6"]
