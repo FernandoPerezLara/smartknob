@@ -1,6 +1,6 @@
 mod spi;
 
-use crate::HardwareError;
+use crate::SmartknobError;
 use esp_hal::spi::Mode;
 use esp_hal::timer::systimer::SystemTimer;
 pub use spi::SpiInterface;
@@ -10,7 +10,7 @@ pub struct Hardware {
 }
 
 impl Hardware {
-    pub async fn init() -> Result<Self, HardwareError> {
+    pub async fn init() -> Result<Self, SmartknobError> {
         let peripherals = esp_hal::init(esp_hal::Config::default());
 
         let timer = SystemTimer::new(peripherals.SYSTIMER);

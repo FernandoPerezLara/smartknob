@@ -1,4 +1,4 @@
-use crate::HardwareError;
+use crate::SmartknobError;
 use esp_hal::gpio::{InputPin, OutputPin};
 use esp_hal::spi::Mode;
 use esp_hal::spi::master::{Config, Instance, Spi};
@@ -17,7 +17,7 @@ impl SpiInterface {
         mosi: MOSI,
         miso: MISO,
         cs: CS,
-    ) -> Result<Self, HardwareError>
+    ) -> Result<Self, SmartknobError>
     where
         SPI: Instance + 'static,
         SCLK: OutputPin + 'static,
@@ -30,7 +30,7 @@ impl SpiInterface {
             .with_mode(mode);
 
         let spi = Spi::new(spi_instance, spi_config)
-            .map_err(HardwareError::SpiConfig)?
+            .map_err(SmartknobError::from)?
             .with_sck(sclk)
             .with_mosi(mosi)
             .with_miso(miso)
@@ -40,21 +40,21 @@ impl SpiInterface {
         Ok(Self { spi })
     }
 
-    pub async fn write(&mut self, data: &[u8]) -> Result<(), HardwareError> {
+    pub async fn write(&mut self, data: &[u8]) -> Result<(), SmartknobError> {
         embedded_hal_async::spi::SpiBus::write(&mut self.spi, data)
             .await
-            .map_err(|_| HardwareError::SpiWrite)
+            .map_err(|_| SmartknobError::spi("SPI write operation failed"))
     }
 
-    pub async fn read(&mut self, data: &mut [u8]) -> Result<(), HardwareError> {
+    pub async fn read(&mut self, data: &mut [u8]) -> Result<(), SmartknobError> {
         embedded_hal_async::spi::SpiBus::read(&mut self.spi, data)
             .await
-            .map_err(|_| HardwareError::SpiRead)
+            .map_err(|_| SmartknobError::spi("SPI read operation failed"))
     }
 
-    pub async fn transfer(&mut self, read: &mut [u8], write: &[u8]) -> Result<(), HardwareError> {
+    pub async fn transfer(&mut self, read: &mut [u8], write: &[u8]) -> Result<(), SmartknobError> {
         embedded_hal_async::spi::SpiBus::transfer(&mut self.spi, read, write)
             .await
-            .map_err(|_| HardwareError::SpiTransfer)
+            .map_err(|_| SmartknobError::spi("SPI transfer operation failed"))
     }
 }

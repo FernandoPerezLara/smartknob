@@ -1,4 +1,4 @@
-use crate::HardwareError;
+use crate::SmartknobError;
 use crate::hardware::Hardware;
 use embassy_time::{Duration, Timer};
 use log::{error, info};
@@ -8,13 +8,13 @@ pub struct App {
 }
 
 impl App {
-    pub async fn new() -> Result<Self, HardwareError> {
+    pub async fn new() -> Result<Self, SmartknobError> {
         let hardware = Hardware::init().await?;
 
         Ok(Self { hardware })
     }
 
-    pub async fn run(&mut self) -> Result<(), HardwareError> {
+    pub async fn run(&mut self) -> Result<(), SmartknobError> {
         log::info!("Starting Smartknob application");
 
         let send_buffer = [0, 1, 2, 3, 4, 5, 6, 7];
