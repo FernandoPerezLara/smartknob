@@ -9,6 +9,7 @@
             "enable": true
           }
         },
+        "checkOnSave": true,
         "procMacro": {
           "enable": true
         }
