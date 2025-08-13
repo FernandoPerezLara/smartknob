@@ -1,7 +1,7 @@
-use crate::SmartknobError;
+use crate::error::{HardwareError, SmartknobError};
 use crate::hardware::Hardware;
 use embassy_time::{Duration, Timer};
-use log::{error, info};
+use log::{debug, info};
 
 pub struct App {
     hardware: Hardware,
@@ -9,28 +9,37 @@ pub struct App {
 
 impl App {
     pub async fn new() -> Result<Self, SmartknobError> {
+        info!("Starting application");
+
+        // let hardware = match Hardware::init().await {
+        //     Ok(hardware) => {
+        //         debug!("Hardware initialized successfully");
+        //         hardware
+        //     },
+        //     Err(e) => {
+        //         error!("Failed to initialize hardware: {:?}", e);
+        //         return Err(SmartknobError::Hardware(e));
+        //     },
+        // };
+
         let hardware = Hardware::init().await?;
+        debug!("Hardware initialized successfully");
 
         Ok(Self { hardware })
     }
 
     pub async fn run(&mut self) -> Result<(), SmartknobError> {
-        log::info!("Starting Smartknob application");
+        log::info!("Starting main loop");
 
         let send_buffer = [0, 1, 2, 3, 4, 5, 6, 7];
         loop {
             let mut read_buffer = [0; 8];
 
-            if let Err(e) = self
-                .hardware
+            self.hardware
                 .display_spi
                 .transfer(&mut read_buffer, &send_buffer)
                 .await
-            {
-                error!("SPI transfer failed: {:?}", e);
-                Timer::after(Duration::from_millis(1000)).await;
-                continue;
-            }
+                .map_err(|e| SmartknobError::Hardware(HardwareError::Spi(e)))?;
 
             info!("Bytes sent: {:?}", send_buffer);
             info!("Bytes received: {:?}", read_buffer);

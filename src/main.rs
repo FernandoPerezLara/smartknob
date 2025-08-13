@@ -4,14 +4,7 @@
 use embassy_executor::Spawner;
 use esp_backtrace as _;
 use log::{error, info};
-
-mod app;
-mod error;
-mod hardware;
-
-pub use app::App;
-pub use error::*;
-pub use hardware::Hardware;
+use smartknob::App;
 
 esp_bootloader_esp_idf::esp_app_desc!();
 
