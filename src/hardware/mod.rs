@@ -1,62 +1,61 @@
-mod error;
-mod spi;
+pub mod error;
+pub mod spi;
 
-pub use error::HardwareError;
+use error::HardwareError;
+use esp_hal::gpio::{Level, Output, OutputConfig};
+use esp_hal::peripherals::Peripherals;
 use esp_hal::spi::Mode;
 use esp_hal::timer::systimer::SystemTimer;
-use log::info;
-pub use spi::SpiInterface;
+use log::{debug, info};
+use spi::SpiInterface;
+
+pub struct Pins {
+    pub display_dc: Output<'static>,
+    pub display_rst: Output<'static>,
+    pub display_cs: Output<'static>,
+}
 
 pub struct Hardware {
     pub display_spi: SpiInterface,
+    pub pins: Pins,
 }
 
 impl Hardware {
     pub async fn init() -> Result<Self, HardwareError> {
         info!("Initializing components");
 
-        // let peripherals = Self::init_peripherals()?;
-        let peripherals = esp_hal::init(esp_hal::Config::default());
+        let peripherals = Self::init_peripherals()?;
 
-        // Self::init_embassy(peripherals)?;
         let timer = SystemTimer::new(peripherals.SYSTIMER);
         esp_hal_embassy::init(timer.alarm0);
 
-        // TODO: Probar a usar &peripherals.SPI2...
         let display_spi = SpiInterface::new(
-            25,
+            8,
             Mode::_0,
             peripherals.SPI2,
-            peripherals.GPIO19,
-            peripherals.GPIO18,
-            peripherals.GPIO20,
-            peripherals.GPIO21,
+            peripherals.GPIO8,
+            peripherals.GPIO10,
+            peripherals.GPIO9,
+            // peripherals.GPIO0,
         )?;
+
+        let pins = Pins {
+            display_dc: Output::new(peripherals.GPIO1, Level::High, OutputConfig::default()),
+            display_rst: Output::new(peripherals.GPIO2, Level::High, OutputConfig::default()),
+            display_cs: Output::new(peripherals.GPIO0, Level::High, OutputConfig::default()),
+        };
 
         info!("Components initialized successfully");
 
-        Ok(Self { display_spi })
+        Ok(Self { display_spi, pins })
     }
 
-    // fn init_peripherals() -> Result<Peripherals, HardwareError> {
-    //     debug!("Initializing ESP32 peripherals");
+    fn init_peripherals() -> Result<Peripherals, HardwareError> {
+        debug!("Initializing ESP32 peripherals");
 
-    //     match esp_hal::init(esp_hal::Config::default()) {
-    //         peripherals => {
-    //             debug!("ESP32 peripherals initialized successfully");
-    //             Ok(peripherals)
-    //         }
-    //     }
-    // }
+        let peripherals = esp_hal::init(esp_hal::Config::default());
 
-    // fn init_embassy(peripherals: Peripherals) -> Result<(), HardwareError> {
-    //     debug!("Initializing Embassy timer");
-
-    //     let timer = SystemTimer::new(peripherals.SYSTIMER);
-
-    //     esp_hal_embassy::init(timer.alarm0);
-
-    //     debug!("Embassy timer initialized successfully");
-    //     Ok(())
-    // }
+        debug!("ESP32 peripherals initialized successfully");
+        Ok(peripherals)
+    }
 }

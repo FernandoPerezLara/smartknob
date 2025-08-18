@@ -3,8 +3,10 @@
     "rust-analyzer": {
       "initialization_options": {
         "cargo": {
+          "features": "all",
           "target": "riscv32imac-unknown-none-elf",
           "allTargets": false,
+          "loadOutDirsFromCheck": true,
           "buildScripts": {
             "enable": true
           },
@@ -15,16 +17,25 @@
         },
         "checkOnSave": {
           "enable": true,
-          "command": "check",
+          "command": "clippy",
           "extraArgs": ["--target", "riscv32imac-unknown-none-elf"]
         },
         "procMacro": {
-          "enable": true
+          "enable": true,
+          "attributes": {
+            "enable": true
+          }
         },
         "diagnostics": {
           "enable": true,
           "experimental": {
-            "enable": true
+            "enable": false
+          },
+          "disabled": ["unresolved-proc-macro"]
+        },
+        "imports": {
+          "granularity": {
+            "group": "module"
           }
         }
       }

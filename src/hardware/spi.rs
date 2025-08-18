@@ -9,21 +9,22 @@ pub struct SpiInterface {
 }
 
 impl SpiInterface {
-    pub fn new<SPI, SCLK, MOSI, MISO, CS>(
+    // pub fn new<SPI, SCLK, MOSI, MISO, CS>(
+    pub fn new<SPI, SCLK, MOSI, MISO>(
         frequency: u32,
         mode: Mode,
         spi_instance: SPI,
         sclk: SCLK,
         mosi: MOSI,
         miso: MISO,
-        cs: CS,
+        // cs: CS,
     ) -> Result<Self, SpiError>
     where
         SPI: Instance + 'static,
         SCLK: OutputPin + 'static,
         MOSI: OutputPin + 'static,
         MISO: InputPin + 'static,
-        CS: OutputPin + 'static,
+        // CS: OutputPin + 'static,
     {
         if !(0..=80).contains(&frequency) {
             return Err(SpiError::invalid_parameters(
@@ -40,13 +41,13 @@ impl SpiInterface {
             .with_sck(sclk)
             .with_mosi(mosi)
             .with_miso(miso)
-            .with_cs(cs)
+            // .with_cs(cs)
             .into_async();
 
         Ok(Self { spi })
     }
 
-    pub async fn _write(&mut self, data: &[u8]) -> Result<(), SpiError> {
+    pub async fn write(&mut self, data: &[u8]) -> Result<(), SpiError> {
         if data.is_empty() {
             return Err(SpiError::invalid_parameters(
                 "Write data buffer cannot be empty",
@@ -58,7 +59,7 @@ impl SpiInterface {
             .map_err(|_| SpiError::write_failed("Failed to write data to SPI bus"))
     }
 
-    pub async fn _read(&mut self, data: &mut [u8]) -> Result<(), SpiError> {
+    pub async fn read(&mut self, data: &mut [u8]) -> Result<(), SpiError> {
         if data.is_empty() {
             return Err(SpiError::invalid_parameters(
                 "Read data buffer cannot be empty",
@@ -84,6 +85,18 @@ impl SpiInterface {
         }
 
         embedded_hal_async::spi::SpiBus::transfer(&mut self.spi, read, write)
+            .await
+            .map_err(|_| SpiError::transfer_failed("Failed to transfer data on SPI bus"))
+    }
+
+    pub async fn transfer_in_place(&mut self, data: &mut [u8]) -> Result<(), SpiError> {
+        if data.is_empty() {
+            return Err(SpiError::invalid_parameters(
+                "Data buffer cannot be empty",
+            ));
+        }
+
+        embedded_hal_async::spi::SpiBus::transfer_in_place(&mut self.spi, data)
             .await
             .map_err(|_| SpiError::transfer_failed("Failed to transfer data on SPI bus"))
     }

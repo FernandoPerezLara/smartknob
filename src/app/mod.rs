@@ -1,50 +1,67 @@
-use crate::error::{HardwareError, SmartknobError};
+use crate::error::SmartknobError;
 use crate::hardware::Hardware;
+use crate::peripherals::display::Display;
 use embassy_time::{Duration, Timer};
 use log::{debug, info};
 
 pub struct App {
-    hardware: Hardware,
+    display: Display,
 }
 
 impl App {
     pub async fn new() -> Result<Self, SmartknobError> {
         info!("Starting application");
 
-        // let hardware = match Hardware::init().await {
-        //     Ok(hardware) => {
-        //         debug!("Hardware initialized successfully");
-        //         hardware
-        //     },
-        //     Err(e) => {
-        //         error!("Failed to initialize hardware: {:?}", e);
-        //         return Err(SmartknobError::Hardware(e));
-        //     },
-        // };
-
         let hardware = Hardware::init().await?;
-        debug!("Hardware initialized successfully");
+        debug!("Components initialized successfully");
 
-        Ok(Self { hardware })
+        let display = Display::new(
+            hardware.display_spi,
+            hardware.pins.display_dc,
+            hardware.pins.display_rst,
+            hardware.pins.display_cs,
+        );
+
+        // display.begin().await?;
+
+        Ok(Self { display })
     }
 
     pub async fn run(&mut self) -> Result<(), SmartknobError> {
+        match self.display.begin().await {
+            Ok(_) => info!("Display initialized successfully"),
+            Err(e) => {
+                log::error!("Failed to initialize display: {:?}", e);
+                return Err(e.into());
+            },
+        }
+
         log::info!("Starting main loop");
 
-        let send_buffer = [0, 1, 2, 3, 4, 5, 6, 7];
         loop {
-            let mut read_buffer = [0; 8];
+            // Rojo
+            match self.display.set_background(0xF800).await {
+                Ok(_) => info!("Screen filled successfully"),
+                Err(e) => log::error!("Failed to fill screen: {:?}", e),
+            }
 
-            self.hardware
-                .display_spi
-                .transfer(&mut read_buffer, &send_buffer)
-                .await
-                .map_err(|e| SmartknobError::Hardware(HardwareError::Spi(e)))?;
+            Timer::after(Duration::from_millis(3000)).await;
 
-            info!("Bytes sent: {:?}", send_buffer);
-            info!("Bytes received: {:?}", read_buffer);
+            // Verde
+            match self.display.set_background(0x07E0).await {
+                Ok(_) => info!("Screen filled successfully"),
+                Err(e) => log::error!("Failed to fill screen: {:?}", e),
+            }
 
-            Timer::after(Duration::from_millis(5_000)).await;
+            Timer::after(Duration::from_millis(3000)).await;
+
+            // Azul
+            match self.display.set_background(0x001F).await {
+                Ok(_) => info!("Screen filled successfully"),
+                Err(e) => log::error!("Failed to fill screen: {:?}", e),
+            }
+
+            Timer::after(Duration::from_millis(3000)).await;
         }
     }
 }
