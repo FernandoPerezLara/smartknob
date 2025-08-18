@@ -88,16 +88,4 @@ impl SpiInterface {
             .await
             .map_err(|_| SpiError::transfer_failed("Failed to transfer data on SPI bus"))
     }
-
-    pub async fn transfer_in_place(&mut self, data: &mut [u8]) -> Result<(), SpiError> {
-        if data.is_empty() {
-            return Err(SpiError::invalid_parameters(
-                "Data buffer cannot be empty",
-            ));
-        }
-
-        embedded_hal_async::spi::SpiBus::transfer_in_place(&mut self.spi, data)
-            .await
-            .map_err(|_| SpiError::transfer_failed("Failed to transfer data on SPI bus"))
-    }
 }
