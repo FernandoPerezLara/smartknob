@@ -19,10 +19,7 @@ impl App {
             hardware.display_spi,
             hardware.pins.display_dc,
             hardware.pins.display_rst,
-            hardware.pins.display_cs,
         );
-
-        // display.begin().await?;
 
         Ok(Self { display })
     }
@@ -39,7 +36,7 @@ impl App {
         log::info!("Starting main loop");
 
         loop {
-            // Rojo
+            // Red
             match self.display.set_background(0xF800).await {
                 Ok(_) => info!("Screen filled successfully"),
                 Err(e) => log::error!("Failed to fill screen: {:?}", e),
@@ -47,7 +44,7 @@ impl App {
 
             Timer::after(Duration::from_millis(3000)).await;
 
-            // Verde
+            // Green
             match self.display.set_background(0x07E0).await {
                 Ok(_) => info!("Screen filled successfully"),
                 Err(e) => log::error!("Failed to fill screen: {:?}", e),
@@ -55,7 +52,7 @@ impl App {
 
             Timer::after(Duration::from_millis(3000)).await;
 
-            // Azul
+            // Blue
             match self.display.set_background(0x001F).await {
                 Ok(_) => info!("Screen filled successfully"),
                 Err(e) => log::error!("Failed to fill screen: {:?}", e),

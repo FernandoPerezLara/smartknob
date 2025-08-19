@@ -12,7 +12,6 @@ use spi::SpiInterface;
 pub struct Pins {
     pub display_dc: Output<'static>,
     pub display_rst: Output<'static>,
-    pub display_cs: Output<'static>,
 }
 
 pub struct Hardware {
@@ -29,20 +28,21 @@ impl Hardware {
         let timer = SystemTimer::new(peripherals.SYSTIMER);
         esp_hal_embassy::init(timer.alarm0);
 
+        let cs = peripherals.GPIO0;
+
         let display_spi = SpiInterface::new(
-            8,
+            24,
             Mode::_0,
             peripherals.SPI2,
-            peripherals.GPIO8,
-            peripherals.GPIO10,
-            peripherals.GPIO9,
-            // peripherals.GPIO0,
+            peripherals.GPIO19,
+            peripherals.GPIO18,
+            peripherals.GPIO20,
+            cs,
         )?;
 
         let pins = Pins {
             display_dc: Output::new(peripherals.GPIO1, Level::High, OutputConfig::default()),
             display_rst: Output::new(peripherals.GPIO2, Level::High, OutputConfig::default()),
-            display_cs: Output::new(peripherals.GPIO0, Level::High, OutputConfig::default()),
         };
 
         info!("Components initialized successfully");

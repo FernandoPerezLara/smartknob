@@ -46,9 +46,9 @@ const CONFIG: &[Operation] = &[
     Operation::Data(0xFF),
     Operation::Command(0xB6),
     Operation::Data(0x00),
-    Operation::Data(0x00),
+    Operation::Data(0x20),
     Operation::Command(0x36),
-    Operation::Data(0x48),
+    Operation::Data(0x08),
     Operation::Command(0x3A),
     Operation::Data(0x05),
     Operation::Command(0x90),
@@ -198,43 +198,24 @@ const CONFIG: &[Operation] = &[
     Operation::Command(0x11),
     Operation::Delay(120),
     Operation::Command(0x29),
-    Operation::Delay(255),
+    Operation::Delay(20),
 ];
 
 pub struct Display {
     spi: SpiInterface,
     dc: Output<'static>,
     rst: Output<'static>,
-    cs: Output<'static>,
 }
 
 impl Display {
-    pub fn new(
-        spi: SpiInterface,
-        dc: Output<'static>,
-        rst: Output<'static>,
-        cs: Output<'static>,
-    ) -> Self {
-        Self { spi, dc, rst, cs }
+    pub fn new(spi: SpiInterface, dc: Output<'static>, rst: Output<'static>) -> Self {
+        Self { spi, dc, rst }
     }
 
     pub async fn begin(&mut self) -> Result<(), DisplayError> {
         info!("Initializing display");
 
-        self.cs.set_high();
-        self.dc.set_high();
-        self.rst.set_high();
-        Timer::after(Duration::from_millis(50)).await;
-
-        self.rst.set_high();
-        Timer::after(Duration::from_millis(100)).await;
-        self.rst.set_low();
-        Timer::after(Duration::from_millis(100)).await;
-        self.rst.set_high();
-        Timer::after(Duration::from_millis(200)).await;
-
         self.reset_display().await;
-        Timer::after(Duration::from_millis(150)).await;
 
         for step in CONFIG.iter() {
             match step {
@@ -252,32 +233,22 @@ impl Display {
         debug!("Resetting display");
 
         self.rst.set_high();
-        Timer::after(Duration::from_millis(10)).await;
         self.rst.set_low();
-        Timer::after(Duration::from_millis(10)).await;
         self.rst.set_high();
-        Timer::after(Duration::from_millis(120)).await;
     }
 
     async fn write_command(&mut self, command: u8) -> Result<(), DisplayError> {
-        self.cs.set_low();
         self.dc.set_low();
 
-        self.spi.write(&[command]).await?;
-
-        self.cs.set_high();
-        self.dc.set_high();
+        self.spi.write(&mut [command]).await?;
 
         Ok(())
     }
 
     async fn write_data(&mut self, data: u8) -> Result<(), DisplayError> {
-        self.cs.set_low();
         self.dc.set_high();
 
-        self.spi.write(&[data]).await?;
-
-        self.cs.set_high();
+        self.spi.write(&mut [data]).await?;
 
         Ok(())
     }
@@ -306,14 +277,17 @@ impl Display {
         let hi = (color >> 8) as u8;
         let lo = (color & 0xFF) as u8;
 
-        self.cs.set_low();
-        self.dc.set_high();
-
-        for _i in 0..(240 * 240) {
-            self.spi.write(&[hi, lo]).await?;
+        let mut buffer = [0u8; 480];
+        for i in (0..480).step_by(2) {
+            buffer[i] = hi;
+            buffer[i + 1] = lo;
         }
 
-        self.cs.set_high();
+        self.dc.set_high();
+
+        for _row in 0..240 {
+            self.spi.write(&mut buffer).await?;
+        }
 
         Ok(())
     }
