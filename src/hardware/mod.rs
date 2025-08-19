@@ -28,7 +28,7 @@ impl Hardware {
         let timer = SystemTimer::new(peripherals.SYSTIMER);
         esp_hal_embassy::init(timer.alarm0);
 
-        let cs = peripherals.GPIO0;
+        let cs = Output::new(peripherals.GPIO0, Level::High, OutputConfig::default());
 
         let display_spi = SpiInterface::new(
             24,
