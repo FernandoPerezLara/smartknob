@@ -52,7 +52,7 @@ impl SpiInterface {
         Ok(Self { spi, cs })
     }
 
-    pub async fn write(&mut self, data: &mut [u8]) -> Result<(), SpiError> {
+    pub async fn write(&mut self, data: &[u8]) -> Result<(), SpiError> {
         if data.is_empty() {
             return Err(SpiError::invalid_parameters(
                 "Write data buffer cannot be empty",
