@@ -6,6 +6,10 @@ use error::DisplayError;
 use esp_hal::gpio::Output;
 use log::{debug, info};
 
+const DISPLAY_WIDTH: u16 = 240;
+const DISPLAY_HEIGHT: u16 = 240;
+const BUFFER_SIZE: usize = 480;
+
 enum Operation {
     Command(u8),
     Data(u8),
@@ -215,31 +219,40 @@ impl Display {
     pub async fn begin(&mut self) -> Result<(), DisplayError> {
         info!("Initializing display");
 
-        self.reset_display().await;
+        self.hardware_reset().await;
+        self.initialize_display().await?;
 
-        for step in CONFIG.iter() {
-            match step {
+        info!("Display initialized successfully");
+        Ok(())
+    }
+
+    async fn hardware_reset(&mut self) {
+        debug!("Resetting display");
+
+        self.rst.set_high();
+        Timer::after(Duration::from_millis(10)).await;
+        self.rst.set_low();
+        Timer::after(Duration::from_millis(120)).await;
+        self.rst.set_high();
+        Timer::after(Duration::from_millis(120)).await;
+    }
+
+    async fn initialize_display(&mut self) -> Result<(), DisplayError> {
+        debug!("Executing display initialization sequence");
+
+        for operation in CONFIG.iter() {
+            match operation {
                 Operation::Command(command) => self.write_command(*command).await?,
                 Operation::Data(data) => self.write_data(*data).await?,
                 Operation::Delay(delay) => Timer::after(Duration::from_millis(*delay)).await,
             }
         }
 
-        info!("Display initialized successfully");
         Ok(())
-    }
-
-    async fn reset_display(&mut self) {
-        debug!("Resetting display");
-
-        self.rst.set_high();
-        self.rst.set_low();
-        self.rst.set_high();
     }
 
     async fn write_command(&mut self, command: u8) -> Result<(), DisplayError> {
         self.dc.set_low();
-
         self.spi.write(&mut [command]).await?;
 
         Ok(())
@@ -247,13 +260,25 @@ impl Display {
 
     async fn write_data(&mut self, data: u8) -> Result<(), DisplayError> {
         self.dc.set_high();
-
         self.spi.write(&mut [data]).await?;
 
         Ok(())
     }
 
     async fn set_frame(&mut self, x1: u16, y1: u16, x2: u16, y2: u16) -> Result<(), DisplayError> {
+        debug!(
+            "Setting frame: x1: {}, y1: {}, x2: {}, y2: {}",
+            x1, y1, x2, y2
+        );
+
+        if x1 >= DISPLAY_WIDTH
+            || x2 >= DISPLAY_WIDTH
+            || y1 >= DISPLAY_HEIGHT
+            || y2 >= DISPLAY_HEIGHT
+        {
+            return Err(DisplayError::OutOfBounds { x1, y1, x2, y2 });
+        }
+
         self.write_command(0x2A).await?;
         self.write_data((x1 >> 8) as u8).await?;
         self.write_data((x1 & 0xFF) as u8).await?;
@@ -272,22 +297,47 @@ impl Display {
     }
 
     pub async fn set_background(&mut self, color: u16) -> Result<(), DisplayError> {
-        self.set_frame(0, 0, 239, 239).await?;
+        debug!("Setting background color: 0x{:04X}", color);
+
+        self.sleep().await?;
+
+        self.set_frame(0, 0, DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1)
+            .await?;
 
         let hi = (color >> 8) as u8;
         let lo = (color & 0xFF) as u8;
 
-        let mut buffer = [0u8; 480];
-        for i in (0..480).step_by(2) {
+        let mut buffer = [0u8; BUFFER_SIZE];
+        for i in (0..BUFFER_SIZE).step_by(2) {
             buffer[i] = hi;
             buffer[i + 1] = lo;
         }
 
         self.dc.set_high();
 
-        for _row in 0..240 {
+        for _row in 0..DISPLAY_HEIGHT {
             self.spi.write(&mut buffer).await?;
         }
+
+        self.wake().await?;
+
+        Ok(())
+    }
+
+    async fn sleep(&mut self) -> Result<(), DisplayError> {
+        debug!("Putting display to sleep");
+
+        self.write_command(0x28).await?;
+        self.write_command(0x10).await?;
+
+        Ok(())
+    }
+
+    async fn wake(&mut self) -> Result<(), DisplayError> {
+        debug!("Waking display");
+
+        self.write_command(0x11).await?;
+        self.write_command(0x29).await?;
 
         Ok(())
     }

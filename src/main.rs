@@ -3,7 +3,7 @@
 
 use embassy_executor::Spawner;
 use esp_backtrace as _;
-use log::{error, info};
+use log::{error, info, warn};
 use smartknob::App;
 
 esp_bootloader_esp_idf::esp_app_desc!();
@@ -26,4 +26,6 @@ async fn main(_spawner: Spawner) {
     if let Err(e) = app.run().await {
         error!("Application error: {}", e);
     }
+
+    warn!("Application has exited unexpectedly. Please check the logs for details.");
 }

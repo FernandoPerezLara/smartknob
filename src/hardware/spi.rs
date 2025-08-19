@@ -5,6 +5,7 @@ use esp_hal::gpio::{InputPin, Output, OutputPin};
 use esp_hal::spi::Mode;
 use esp_hal::spi::master::{Config, Instance, Spi};
 use esp_hal::time::Rate;
+use log::debug;
 
 pub struct SpiInterface {
     spi: Spi<'static, Async>,
@@ -33,6 +34,8 @@ impl SpiInterface {
             ));
         }
 
+        debug!("Initializing SPI interface");
+
         let spi_config = Config::default()
             .with_frequency(Rate::from_mhz(frequency))
             .with_mode(mode);
@@ -43,6 +46,8 @@ impl SpiInterface {
             .with_mosi(mosi)
             .with_miso(miso)
             .into_async();
+
+        debug!("SPI interface initialized successfully");
 
         Ok(Self { spi, cs })
     }
@@ -57,40 +62,51 @@ impl SpiInterface {
         self.cs.set_low();
 
         let result = SpiBus::write(&mut self.spi, data).await;
-        let _ = SpiBus::flush(&mut self.spi).await;
+
+        if result.is_ok() {
+            let _ = SpiBus::flush(&mut self.spi).await;
+        }
 
         self.cs.set_high();
 
         result.map_err(|_| SpiError::write_failed("Failed to write data to SPI bus"))
     }
 
-    // pub async fn read(&mut self, data: &mut [u8]) -> Result<(), SpiError> {
-    //     if data.is_empty() {
-    //         return Err(SpiError::invalid_parameters(
-    //             "Read data buffer cannot be empty",
-    //         ));
-    //     }
+    pub async fn read(&mut self, data: &mut [u8]) -> Result<(), SpiError> {
+        if data.is_empty() {
+            return Err(SpiError::invalid_parameters(
+                "Read data buffer cannot be empty",
+            ));
+        }
 
-    //     SpiBus::read(&mut self.spi, data)
-    //         .await
-    //         .map_err(|_| SpiError::read_failed("Failed to read data from SPI bus"))
-    // }
+        self.cs.set_low();
 
-    // pub async fn transfer(&mut self, read: &mut [u8], write: &[u8]) -> Result<(), SpiError> {
-    //     if read.is_empty() && write.is_empty() {
-    //         return Err(SpiError::invalid_parameters(
-    //             "Read and write data buffers cannot be empty",
-    //         ));
-    //     }
+        let result = SpiBus::read(&mut self.spi, data).await;
 
-    //     if read.len() != write.len() {
-    //         return Err(SpiError::invalid_parameters(
-    //             "Read and write data buffers must have the same length",
-    //         ));
-    //     }
+        self.cs.set_high();
 
-    //     SpiBus::transfer(&mut self.spi, read, write)
-    //         .await
-    //         .map_err(|_| SpiError::transfer_failed("Failed to transfer data on SPI bus"))
-    // }
+        result.map_err(|_| SpiError::read_failed("Failed to read data from SPI bus"))
+    }
+
+    pub async fn transfer(&mut self, read: &mut [u8], write: &[u8]) -> Result<(), SpiError> {
+        if read.is_empty() && write.is_empty() {
+            return Err(SpiError::invalid_parameters(
+                "Read and write data buffers cannot be empty",
+            ));
+        }
+
+        if read.len() != write.len() {
+            return Err(SpiError::invalid_parameters(
+                "Read and write data buffers must have the same length",
+            ));
+        }
+
+        self.cs.set_low();
+
+        let result = SpiBus::transfer(&mut self.spi, read, write).await;
+
+        self.cs.set_high();
+
+        result.map_err(|_| SpiError::read_failed("Failed to read data from SPI bus"))
+    }
 }

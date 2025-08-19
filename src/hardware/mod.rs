@@ -31,7 +31,7 @@ impl Hardware {
         let cs = Output::new(peripherals.GPIO0, Level::High, OutputConfig::default());
 
         let display_spi = SpiInterface::new(
-            24,
+            40,
             Mode::_0,
             peripherals.SPI2,
             peripherals.GPIO19,

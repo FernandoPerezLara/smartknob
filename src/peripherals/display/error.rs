@@ -5,12 +5,7 @@ use core::fmt;
 pub enum DisplayError {
     Spi(SpiError),
     InvalidOperation(&'static str),
-}
-
-impl DisplayError {
-    pub fn invalid_operation(msg: &'static str) -> Self {
-        Self::InvalidOperation(msg)
-    }
+    OutOfBounds { x1: u16, y1: u16, x2: u16, y2: u16 },
 }
 
 impl From<SpiError> for DisplayError {
@@ -24,6 +19,11 @@ impl fmt::Display for DisplayError {
         match self {
             Self::Spi(err) => write!(f, "SPI error in display: {}", err),
             Self::InvalidOperation(msg) => write!(f, "Invalid display operation: {}", msg),
+            Self::OutOfBounds { x1, y1, x2, y2 } => write!(
+                f,
+                "Coordinates out of bounds: ({}, {}) > ({}, {})",
+                x1, y1, x2, y2
+            ),
         }
     }
 }
