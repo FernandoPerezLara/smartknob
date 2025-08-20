@@ -333,8 +333,6 @@ impl Display {
             buffer[i + 1] = lo;
         }
 
-        self.dc.set_high();
-
         for _row in 0..DISPLAY_HEIGHT {
             self.write_data(&buffer).await?;
         }
