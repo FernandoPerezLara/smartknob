@@ -311,8 +311,7 @@ impl Display {
         let hi = (color >> 8) as u8;
         let lo = (color & 0xFF) as u8;
 
-        self.dc.set_high();
-        self.spi.write(&[hi, lo]).await?;
+        self.write_data(&[hi, lo]).await?;
 
         Ok(())
     }
@@ -337,7 +336,7 @@ impl Display {
         self.dc.set_high();
 
         for _row in 0..DISPLAY_HEIGHT {
-            self.spi.write(&buffer).await?;
+            self.write_data(&buffer).await?;
         }
 
         self.wake().await?;
