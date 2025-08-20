@@ -36,27 +36,27 @@ impl App {
 
         info!("Starting main loop");
 
+        match self.display.set_background(0xF800).await {
+            Ok(_) => info!("Screen filled successfully"),
+            Err(e) => error!("Failed to fill screen: {}", e),
+        }
+
+        let mut x = 0;
+        let mut y = 0;
+
         loop {
-            match self.display.set_background(0xF800).await {
-                Ok(_) => info!("Screen filled successfully"),
-                Err(e) => error!("Failed to fill screen: {}", e),
+            self.display.set_pixel(x, y, 0x07E0).await?;
+
+            x += 1;
+            if x >= 240 {
+                x = 0;
+            }
+            y += 1;
+            if y >= 240 {
+                y = 0;
             }
 
-            Timer::after(Duration::from_millis(3000)).await;
-
-            match self.display.set_background(0x07E0).await {
-                Ok(_) => info!("Screen filled successfully"),
-                Err(e) => error!("Failed to fill screen: {}", e),
-            }
-
-            Timer::after(Duration::from_millis(3000)).await;
-
-            match self.display.set_background(0x001F).await {
-                Ok(_) => info!("Screen filled successfully"),
-                Err(e) => error!("Failed to fill screen: {}", e),
-            }
-
-            Timer::after(Duration::from_millis(3000)).await;
+            Timer::after(Duration::from_millis(10)).await;
         }
     }
 }

@@ -248,6 +248,24 @@ impl Display {
         Ok(())
     }
 
+    async fn sleep(&mut self) -> Result<(), DisplayError> {
+        debug!("Putting display to sleep");
+
+        self.write_command(commands::DISPOFF).await?;
+        self.write_command(commands::SLPIN).await?;
+
+        Ok(())
+    }
+
+    async fn wake(&mut self) -> Result<(), DisplayError> {
+        debug!("Waking display");
+
+        self.write_command(commands::SLPOUT).await?;
+        self.write_command(commands::DISPON).await?;
+
+        Ok(())
+    }
+
     async fn set_frame(&mut self, x1: u16, y1: u16, x2: u16, y2: u16) -> Result<(), DisplayError> {
         debug!(
             "Setting frame: x1: {}, y1: {}, x2: {}, y2: {}",
@@ -285,6 +303,20 @@ impl Display {
         Ok(())
     }
 
+    pub async fn set_pixel(&mut self, x: u16, y: u16, color: u16) -> Result<(), DisplayError> {
+        debug!("Setting pixel at ({}, {}) to color 0x{:04X}", x, y, color);
+
+        self.set_frame(x, y, x, y).await?;
+
+        let hi = (color >> 8) as u8;
+        let lo = (color & 0xFF) as u8;
+
+        self.dc.set_high();
+        self.spi.write(&[hi, lo]).await?;
+
+        Ok(())
+    }
+
     pub async fn set_background(&mut self, color: u16) -> Result<(), DisplayError> {
         debug!("Setting background color: 0x{:04X}", color);
 
@@ -309,24 +341,6 @@ impl Display {
         }
 
         self.wake().await?;
-
-        Ok(())
-    }
-
-    async fn sleep(&mut self) -> Result<(), DisplayError> {
-        debug!("Putting display to sleep");
-
-        self.write_command(commands::DISPOFF).await?;
-        self.write_command(commands::SLPIN).await?;
-
-        Ok(())
-    }
-
-    async fn wake(&mut self) -> Result<(), DisplayError> {
-        debug!("Waking display");
-
-        self.write_command(commands::SLPOUT).await?;
-        self.write_command(commands::DISPON).await?;
 
         Ok(())
     }

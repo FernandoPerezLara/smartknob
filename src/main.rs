@@ -27,5 +27,5 @@ async fn main(_spawner: Spawner) {
         error!("Application error: {}", e);
     }
 
-    warn!("Application has exited unexpectedly. Please check the logs for details.");
+    warn!("Application has exited unexpectedly. Please check the logs for details");
 }
