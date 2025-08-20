@@ -36,20 +36,16 @@ impl App {
 
         info!("Starting main loop");
 
+        match self.display.set_background(0xF800).await {
+            Ok(_) => info!("Screen filled successfully"),
+            Err(e) => error!("Failed to fill screen: {}", e),
+        }
+        Timer::after(Duration::from_millis(1000)).await;
+
         loop {
-            match self.display.set_background(0xF800).await {
-                Ok(_) => info!("Screen filled successfully"),
-                Err(e) => error!("Failed to fill screen: {}", e),
-            }
-            Timer::after(Duration::from_millis(1000)).await;
-            match self.display.set_background(0x07E0).await {
-                Ok(_) => info!("Screen filled successfully"),
-                Err(e) => error!("Failed to fill screen: {}", e),
-            }
-            Timer::after(Duration::from_millis(1000)).await;
-            match self.display.set_background(0x001F).await {
-                Ok(_) => info!("Screen filled successfully"),
-                Err(e) => error!("Failed to fill screen: {}", e),
+            match self.display.draw_line(0, 0, 120, 120, 0x07E0).await {
+                Ok(_) => info!("Line drawn successfully"),
+                Err(e) => error!("Failed to draw line: {}", e),
             }
             Timer::after(Duration::from_millis(1000)).await;
         }

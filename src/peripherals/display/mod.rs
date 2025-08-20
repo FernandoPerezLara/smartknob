@@ -341,4 +341,53 @@ impl Display {
 
         Ok(())
     }
+
+    // TODO: Use buffered writes for performance
+    // TODO: Optimize vertical and horizontal lines
+    pub async fn draw_line(
+        &mut self,
+        x1: u16,
+        y1: u16,
+        x2: u16,
+        y2: u16,
+        color: u16,
+    ) -> Result<(), DisplayError> {
+        debug!(
+            "Drawing line from ({}, {}) to ({}, {}) with color 0x{:04X}",
+            x1, y1, x2, y2, color
+        );
+
+        self.set_frame(x1, y1, x2, y2).await?;
+
+        let dx = (x2 as i32 - x1 as i32).abs();
+        let dy = (y2 as i32 - y1 as i32).abs();
+        let sx = if x1 < x2 { 1 } else { -1 };
+        let sy = if y1 < y2 { 1 } else { -1 };
+        let mut err = dx - dy;
+
+        let mut x = x1;
+        let mut y = y1;
+
+        loop {
+            self.set_pixel(x, y, color).await?;
+
+            if x == x2 && y == y2 {
+                break;
+            }
+
+            let err2 = err * 2;
+
+            if err2 > -dy {
+                err -= dy;
+                x += sx as u16;
+            }
+
+            if err2 < dx {
+                err += dx;
+                y += sy as u16;
+            }
+        }
+
+        Ok(())
+    }
 }
