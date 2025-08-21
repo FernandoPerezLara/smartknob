@@ -390,4 +390,52 @@ impl Display {
 
         Ok(())
     }
+
+    // FIXME: The created circle is not centered
+    pub async fn draw_circle(
+        &mut self,
+        x: u16,
+        y: u16,
+        radius: u16,
+        color: u16,
+    ) -> Result<(), DisplayError> {
+        debug!(
+            "Drawing circle at ({}, {}) with radius {} and color 0x{:04X}",
+            x, y, radius, color
+        );
+
+        let mut f = 1 - radius as i32;
+        let mut dd_f_x = 1;
+        let mut dd_f_y = -2 * radius as i32;
+        let mut x1 = 0;
+        let mut y1 = radius as i32;
+
+        while x1 < y1 {
+            if f >= 0 {
+                y1 -= 1;
+                dd_f_y += 2;
+                f += dd_f_y;
+            }
+
+            x1 += 1;
+            dd_f_x += 2;
+            f += dd_f_x;
+
+            self.set_pixel(x + x1 as u16, y + y1 as u16, color).await?;
+            self.set_pixel(x - x1 as u16, y + y1 as u16, color).await?;
+            self.set_pixel(x + x1 as u16, y - y1 as u16, color).await?;
+            self.set_pixel(x - x1 as u16, y - y1 as u16, color).await?;
+            self.set_pixel(x + y1 as u16, y + x1 as u16, color).await?;
+            self.set_pixel(x - y1 as u16, y + x1 as u16, color).await?;
+            self.set_pixel(x + y1 as u16, y - x1 as u16, color).await?;
+            self.set_pixel(x - y1 as u16, y - x1 as u16, color).await?;
+        }
+
+        self.set_pixel(x, y + radius, color).await?;
+        self.set_pixel(x, y - radius, color).await?;
+        self.set_pixel(x + radius, y, color).await?;
+        self.set_pixel(x - radius, y, color).await?;
+
+        Ok(())
+    }
 }

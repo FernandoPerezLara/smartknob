@@ -41,12 +41,17 @@ impl App {
             Err(e) => error!("Failed to fill screen: {}", e),
         }
         Timer::after(Duration::from_millis(1000)).await;
+        match self.display.draw_line(0, 0, 120, 120, 0x07E0).await {
+            Ok(_) => info!("Line drawn successfully"),
+            Err(e) => error!("Failed to draw line: {}", e),
+        }
+        Timer::after(Duration::from_millis(1000)).await;
+        match self.display.draw_circle(119, 119, 119, 0x001F).await {
+            Ok(_) => info!("Circle drawn successfully"),
+            Err(e) => error!("Failed to draw circle: {}", e),
+        }
 
         loop {
-            match self.display.draw_line(0, 0, 120, 120, 0x07E0).await {
-                Ok(_) => info!("Line drawn successfully"),
-                Err(e) => error!("Failed to draw line: {}", e),
-            }
             Timer::after(Duration::from_millis(1000)).await;
         }
     }
