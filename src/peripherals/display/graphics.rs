@@ -91,6 +91,7 @@ impl Display {
     }
 
     // FIXME: The created circle is not centered
+    // TODO: Check bounds to avoid overflow
     pub async fn draw_circle(
         &mut self,
         x: u16,
