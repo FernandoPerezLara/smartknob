@@ -15,8 +15,6 @@ pub enum SpiError {
     ReadFailed(&'static str),
 }
 
-impl HardwareError {}
-
 impl SpiError {
     pub fn invalid_parameters(msg: &'static str) -> Self {
         Self::InvalidParameters(msg)

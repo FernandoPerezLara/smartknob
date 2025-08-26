@@ -1,4 +1,4 @@
-use crate::peripherals::display::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Display, DisplayError};
+use super::{BUFFER_SIZE, DISPLAY_HEIGHT, DISPLAY_WIDTH, Display, DisplayError};
 use log::debug;
 
 impl Display {
@@ -26,8 +26,8 @@ impl Display {
         let hi = (color >> 8) as u8;
         let lo = (color & 0xFF) as u8;
 
-        let mut buffer = [0u8; super::BUFFER_SIZE];
-        for i in (0..super::BUFFER_SIZE).step_by(2) {
+        let mut buffer = [0u8; BUFFER_SIZE];
+        for i in (0..BUFFER_SIZE).step_by(2) {
             buffer[i] = hi;
             buffer[i + 1] = lo;
         }

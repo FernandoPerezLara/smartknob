@@ -1,4 +1,4 @@
-use crate::hardware::error::SpiError;
+use super::error::SpiError;
 use embedded_hal_async::spi::SpiBus;
 use esp_hal::Async;
 use esp_hal::gpio::{InputPin, Output, OutputPin};
