@@ -1,4 +1,6 @@
-use super::{BUFFER_SIZE, DISPLAY_HEIGHT, DISPLAY_WIDTH, Display, DisplayError};
+use crate::peripherals::display::{
+    BUFFER_SIZE, DISPLAY_HEIGHT, DISPLAY_WIDTH, Display, DisplayError,
+};
 use log::debug;
 
 impl Display {
