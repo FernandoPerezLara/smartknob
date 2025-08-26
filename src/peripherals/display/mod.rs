@@ -1,6 +1,6 @@
 mod commands;
 pub mod error;
-mod graphics;
+pub mod graphics;
 
 use self::error::DisplayError;
 use crate::hardware::spi::SpiInterface;
