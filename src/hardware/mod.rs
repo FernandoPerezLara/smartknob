@@ -1,7 +1,7 @@
 pub mod error;
 pub mod spi;
 
-use error::HardwareError;
+use self::error::HardwareError;
 use esp_hal::gpio::{Level, Output, OutputConfig};
 use esp_hal::peripherals::Peripherals;
 use esp_hal::spi::Mode;

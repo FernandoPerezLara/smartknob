@@ -1,5 +1,5 @@
-pub use crate::hardware::error::HardwareError;
-pub use crate::peripherals::display::error::DisplayError;
+use crate::hardware::error::HardwareError;
+use crate::peripherals::display::error::DisplayError;
 use core::fmt;
 
 #[derive(Debug)]

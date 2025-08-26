@@ -2,9 +2,9 @@ mod commands;
 pub mod error;
 mod graphics;
 
+use self::error::DisplayError;
 use crate::hardware::spi::SpiInterface;
 use embassy_time::{Duration, Timer};
-use error::DisplayError;
 use esp_hal::gpio::Output;
 use log::{debug, info};
 
