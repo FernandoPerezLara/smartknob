@@ -1,7 +1,7 @@
 use crate::error::SmartknobError;
 use crate::hardware::Hardware;
 use crate::peripherals::display::Display;
-use crate::peripherals::display::graphics::{Circle, Figure, Line};
+use crate::peripherals::display::graphics::{Circle, Line};
 use embassy_time::{Duration, Timer};
 use log::{debug, error, info};
 
@@ -43,18 +43,23 @@ impl App {
         }
         Timer::after(Duration::from_millis(1000)).await;
 
-        let line = Line::new(0, 0, 120, 120, 0x07E0);
-        match line.draw(&mut self.display).await {
-            Ok(_) => info!("Line drawn successfully"),
-            Err(e) => error!("Failed to draw line: {}", e),
-        }
+        let circle = Circle {
+            x: 119,
+            y: 119,
+            radius: 50,
+            color: 0x001F,
+        };
+        self.display.draw(&circle).await?;
         Timer::after(Duration::from_millis(1000)).await;
 
-        let circle = Circle::new(119, 119, 119, 0x001F);
-        match circle.draw(&mut self.display).await {
-            Ok(_) => info!("Circle drawn successfully"),
-            Err(e) => error!("Failed to draw circle: {}", e),
-        }
+        let line = Line {
+            x1: 0,
+            y1: 0,
+            x2: 239,
+            y2: 239,
+            color: 0x07E0,
+        };
+        self.display.draw(&line).await?;
         Timer::after(Duration::from_millis(500)).await;
 
         loop {

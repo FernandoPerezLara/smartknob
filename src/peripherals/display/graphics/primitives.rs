@@ -12,18 +12,6 @@ pub struct Line {
     pub color: u16,
 }
 
-impl Line {
-    pub fn new(x1: u16, y1: u16, x2: u16, y2: u16, color: u16) -> Self {
-        Self {
-            x1,
-            y1,
-            x2,
-            y2,
-            color,
-        }
-    }
-}
-
 impl Figure for Line {
     async fn draw(&self, display: &mut Display) -> Result<(), DisplayError> {
         debug!(
@@ -73,17 +61,6 @@ pub struct Circle {
     pub y: u16,
     pub radius: u16,
     pub color: u16,
-}
-
-impl Circle {
-    pub fn new(x: u16, y: u16, radius: u16, color: u16) -> Self {
-        Self {
-            x,
-            y,
-            radius,
-            color,
-        }
-    }
 }
 
 impl Figure for Circle {
@@ -154,6 +131,13 @@ impl Figure for Circle {
 }
 
 impl Display {
+    pub async fn draw<T>(&mut self, shape: &T) -> Result<(), DisplayError>
+    where
+        T: Figure,
+    {
+        shape.draw(self).await
+    }
+
     pub async fn set_pixel(&mut self, x: u16, y: u16, color: u16) -> Result<(), DisplayError> {
         debug!("Setting pixel at ({}, {}) to color 0x{:04X}", x, y, color);
 
