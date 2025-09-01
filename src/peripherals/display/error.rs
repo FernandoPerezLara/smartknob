@@ -21,7 +21,7 @@ impl fmt::Display for DisplayError {
             Self::InvalidOperation(msg) => write!(f, "Invalid display operation: {}", msg),
             Self::OutOfBounds { x1, y1, x2, y2 } => write!(
                 f,
-                "Coordinates out of bounds: ({}, {}) > ({}, {})",
+                "Coordinates out of bounds: ({}, {}) >= ({}, {})",
                 x1, y1, x2, y2
             ),
         }

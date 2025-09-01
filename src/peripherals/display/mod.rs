@@ -251,12 +251,26 @@ impl Display {
             x1, y1, x2, y2
         );
 
-        if x1 >= DISPLAY_WIDTH
-            || x2 >= DISPLAY_WIDTH
-            || y1 >= DISPLAY_HEIGHT
-            || y2 >= DISPLAY_HEIGHT
-        {
-            return Err(DisplayError::OutOfBounds { x1, y1, x2, y2 });
+        if x1 >= x2 || y1 >= y2 {
+            return Err(DisplayError::OutOfBounds { x1, x2, y1, y2 });
+        }
+
+        if x1 >= DISPLAY_WIDTH || y1 >= DISPLAY_HEIGHT {
+            return Err(DisplayError::OutOfBounds {
+                x1,
+                y1,
+                x2: DISPLAY_WIDTH,
+                y2: DISPLAY_HEIGHT,
+            });
+        }
+
+        if x2 >= DISPLAY_WIDTH || y2 >= DISPLAY_HEIGHT {
+            return Err(DisplayError::OutOfBounds {
+                x1: x2,
+                y1: y2,
+                x2: DISPLAY_WIDTH,
+                y2: DISPLAY_HEIGHT,
+            });
         }
 
         self.write_command(commands::CASET).await?;
