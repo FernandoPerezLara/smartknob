@@ -32,6 +32,7 @@ impl Hardware {
             40,
             Mode::_0,
             peripherals.SPI2,
+            peripherals.DMA_CH0,
             peripherals.GPIO19,
             peripherals.GPIO18,
             peripherals.GPIO20,

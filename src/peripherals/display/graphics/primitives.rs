@@ -138,19 +138,6 @@ impl Display {
         shape.draw(self).await
     }
 
-    pub async fn set_pixel(&mut self, x: u16, y: u16, color: u16) -> Result<(), DisplayError> {
-        debug!("Setting pixel at ({}, {}) to color 0x{:04X}", x, y, color);
-
-        self.set_frame(x, y, x, y).await?;
-
-        let hi = (color >> 8) as u8;
-        let lo = (color & 0xFF) as u8;
-
-        self.write_data(&[hi, lo]).await?;
-
-        Ok(())
-    }
-
     pub async fn set_background(&mut self, color: u16) -> Result<(), DisplayError> {
         debug!("Setting background color: 0x{:04X}", color);
 

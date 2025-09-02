@@ -1,22 +1,27 @@
 use super::error::SpiError;
 use embedded_hal_async::spi::SpiBus;
-use esp_hal::Async;
+use esp_hal::dma::{AnyGdmaChannel, DmaChannelConvert, DmaChannelFor, DmaRxBuf, DmaTxBuf};
 use esp_hal::gpio::{InputPin, Output, OutputPin};
 use esp_hal::spi::Mode;
-use esp_hal::spi::master::{Config, Instance, Spi};
+use esp_hal::spi::master::{Config, Instance, Spi, SpiDmaBus};
 use esp_hal::time::Rate;
+use esp_hal::{Async, dma_buffers};
 use log::debug;
 
+const DMA_BUFFER_SIZE: usize = 32000;
+
 pub struct SpiInterface {
-    spi: Spi<'static, Async>,
+    spi: SpiDmaBus<'static, Async>,
     cs: Output<'static>,
 }
 
 impl SpiInterface {
-    pub fn new<SPI, SCLK, MOSI, MISO>(
+    #[allow(clippy::too_many_arguments)]
+    pub fn new<SPI, DMA, SCLK, MOSI, MISO>(
         frequency: u32,
         mode: Mode,
         spi_instance: SPI,
+        dma_channel: DMA,
         sclk: SCLK,
         mosi: MOSI,
         miso: MISO,
@@ -24,6 +29,7 @@ impl SpiInterface {
     ) -> Result<Self, SpiError>
     where
         SPI: Instance + 'static,
+        DMA: DmaChannelConvert<AnyGdmaChannel<'static>> + DmaChannelFor<SPI> + 'static,
         SCLK: OutputPin + 'static,
         MOSI: OutputPin + 'static,
         MISO: InputPin + 'static,
@@ -40,11 +46,18 @@ impl SpiInterface {
             .with_frequency(Rate::from_mhz(frequency))
             .with_mode(mode);
 
+        #[allow(clippy::manual_div_ceil)]
+        let (rx_buffer, rx_descriptors, tx_buffer, tx_descriptors) = dma_buffers!(DMA_BUFFER_SIZE);
+        let dma_rx_buf = DmaRxBuf::new(rx_descriptors, rx_buffer)?;
+        let dma_tx_buf = DmaTxBuf::new(tx_descriptors, tx_buffer)?;
+
         let spi = Spi::new(spi_instance, spi_config)
             .map_err(SpiError::from)?
             .with_sck(sclk)
             .with_mosi(mosi)
             .with_miso(miso)
+            .with_dma(dma_channel)
+            .with_buffers(dma_rx_buf, dma_tx_buf)
             .into_async();
 
         debug!("SPI interface initialized successfully");

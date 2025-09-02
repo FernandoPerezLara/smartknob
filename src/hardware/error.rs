@@ -1,4 +1,5 @@
 use core::fmt;
+use esp_hal::dma::DmaBufError as SpiBufError;
 use esp_hal::spi::master::ConfigError as SpiConfigError;
 
 #[derive(Debug)]
@@ -9,6 +10,7 @@ pub enum HardwareError {
 #[derive(Debug)]
 pub enum SpiError {
     Config(SpiConfigError),
+    Buffer(SpiBufError),
     InvalidParameters(&'static str),
     TransferFailed(&'static str),
     WriteFailed(&'static str),
@@ -51,6 +53,18 @@ impl From<SpiConfigError> for HardwareError {
     }
 }
 
+impl From<SpiBufError> for SpiError {
+    fn from(err: SpiBufError) -> Self {
+        Self::Buffer(err)
+    }
+}
+
+impl From<SpiBufError> for HardwareError {
+    fn from(err: SpiBufError) -> Self {
+        Self::Spi(SpiError::Buffer(err))
+    }
+}
+
 impl fmt::Display for HardwareError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -63,6 +77,7 @@ impl fmt::Display for SpiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Config(err) => write!(f, "SPI configuration error: {:?}", err),
+            Self::Buffer(err) => write!(f, "SPI buffer error: {:?}", err),
             Self::InvalidParameters(msg) => write!(f, "Invalid SPI parameters: {}", msg),
             Self::TransferFailed(msg) => write!(f, "SPI transfer failed: {}", msg),
             Self::WriteFailed(msg) => write!(f, "SPI write failed: {}", msg),
