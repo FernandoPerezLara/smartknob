@@ -13,15 +13,11 @@ pub struct Line {
 }
 
 impl Figure for Line {
-    async fn draw(&self, display: &mut Display) -> Result<(), DisplayError> {
+    fn draw(&self, display: &mut Display) {
         debug!(
             "Drawing line from ({}, {}) to ({}, {}) with color 0x{:04X}",
             self.x1, self.y1, self.x2, self.y2, self.color
         );
-
-        display
-            .set_frame(self.x1, self.y1, self.x2, self.y2)
-            .await?;
 
         let dx = (self.x2 as i32 - self.x1 as i32).abs();
         let dy = (self.y2 as i32 - self.y1 as i32).abs();
@@ -33,7 +29,7 @@ impl Figure for Line {
         let mut y = self.y1;
 
         loop {
-            display.set_pixel(x, y, self.color).await?;
+            display.set_pixel(x, y, self.color);
 
             if x == self.x2 && y == self.y2 {
                 break;
@@ -51,8 +47,6 @@ impl Figure for Line {
                 y += sy as u16;
             }
         }
-
-        Ok(())
     }
 }
 
@@ -64,7 +58,7 @@ pub struct Circle {
 }
 
 impl Figure for Circle {
-    async fn draw(&self, display: &mut Display) -> Result<(), DisplayError> {
+    fn draw(&self, display: &mut Display) {
         debug!(
             "Drawing circle at ({}, {}) with radius {} and color 0x{:04X}",
             self.x, self.y, self.radius, self.color
@@ -87,55 +81,29 @@ impl Figure for Circle {
             dd_f_x += 2;
             f += dd_f_x;
 
-            display
-                .set_pixel(self.x + x1 as u16, self.y + y1 as u16, self.color)
-                .await?;
-            display
-                .set_pixel(self.x - x1 as u16, self.y + y1 as u16, self.color)
-                .await?;
-            display
-                .set_pixel(self.x + x1 as u16, self.y - y1 as u16, self.color)
-                .await?;
-            display
-                .set_pixel(self.x - x1 as u16, self.y - y1 as u16, self.color)
-                .await?;
-            display
-                .set_pixel(self.x + y1 as u16, self.y + x1 as u16, self.color)
-                .await?;
-            display
-                .set_pixel(self.x - y1 as u16, self.y + x1 as u16, self.color)
-                .await?;
-            display
-                .set_pixel(self.x + y1 as u16, self.y - x1 as u16, self.color)
-                .await?;
-            display
-                .set_pixel(self.x - y1 as u16, self.y - x1 as u16, self.color)
-                .await?;
+            display.set_pixel(self.x + x1 as u16, self.y + y1 as u16, self.color);
+            display.set_pixel(self.x - x1 as u16, self.y + y1 as u16, self.color);
+            display.set_pixel(self.x + x1 as u16, self.y - y1 as u16, self.color);
+            display.set_pixel(self.x - x1 as u16, self.y - y1 as u16, self.color);
+            display.set_pixel(self.x + y1 as u16, self.y + x1 as u16, self.color);
+            display.set_pixel(self.x - y1 as u16, self.y + x1 as u16, self.color);
+            display.set_pixel(self.x + y1 as u16, self.y - x1 as u16, self.color);
+            display.set_pixel(self.x - y1 as u16, self.y - x1 as u16, self.color);
         }
 
-        display
-            .set_pixel(self.x, self.y + self.radius, self.color)
-            .await?;
-        display
-            .set_pixel(self.x, self.y - self.radius, self.color)
-            .await?;
-        display
-            .set_pixel(self.x + self.radius, self.y, self.color)
-            .await?;
-        display
-            .set_pixel(self.x - self.radius, self.y, self.color)
-            .await?;
-
-        Ok(())
+        display.set_pixel(self.x, self.y + self.radius, self.color);
+        display.set_pixel(self.x, self.y - self.radius, self.color);
+        display.set_pixel(self.x + self.radius, self.y, self.color);
+        display.set_pixel(self.x - self.radius, self.y, self.color);
     }
 }
 
 impl Display {
-    pub async fn draw<T>(&mut self, shape: &T) -> Result<(), DisplayError>
+    pub fn draw<T>(&mut self, shape: &T)
     where
         T: Figure,
     {
-        shape.draw(self).await
+        shape.draw(self);
     }
 
     pub async fn set_background(&mut self, color: u16) -> Result<(), DisplayError> {

@@ -37,6 +37,7 @@ impl App {
 
         info!("Starting main loop");
 
+        // TODO: Buffer background fill to avoid flickering
         match self.display.set_background(0xF800).await {
             Ok(_) => info!("Screen filled successfully"),
             Err(e) => error!("Failed to fill screen: {}", e),
@@ -49,8 +50,7 @@ impl App {
             radius: 50,
             color: 0x001F,
         };
-        self.display.draw(&circle).await?;
-        Timer::after(Duration::from_millis(1000)).await;
+        self.display.draw(&circle);
 
         let line = Line {
             x1: 0,
@@ -59,8 +59,9 @@ impl App {
             y2: 239,
             color: 0x07E0,
         };
-        self.display.draw(&line).await?;
-        Timer::after(Duration::from_millis(500)).await;
+        self.display.draw(&line);
+
+        self.display.render().await?;
 
         loop {
             Timer::after(Duration::from_millis(1000)).await;
