@@ -1,0 +1,9 @@
+.zed/
+.claude/
+
+.git/
+.gitignore
+
+target/
+
+*.md

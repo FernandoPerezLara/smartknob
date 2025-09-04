@@ -1,0 +1,16 @@
+services:
+  lint:
+    build: .
+    command: cargo +nightly fmt --all -- --check
+    volumes:
+      - .:/app
+    profiles:
+      - ci
+
+  build:
+    build: .
+    command: cargo +nightly clippy --release -- -D warnings
+    volumes:
+      - .:/app
+    profiles:
+      - ci
