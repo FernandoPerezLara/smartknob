@@ -1,4 +1,4 @@
-name: Run CI Checks
+name: CI
 
 on:
   push:
@@ -8,8 +8,10 @@ on:
 
 jobs:
   lint:
+    name: Lint Check
     uses: ./.github/workflows/lint.yml
 
   build:
+    name: Build Check
     needs: lint
     uses: ./.github/workflows/build.yml
