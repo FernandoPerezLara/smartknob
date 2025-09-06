@@ -12,7 +12,7 @@ use log::{debug, info};
 
 const DISPLAY_WIDTH: u16 = 240;
 const DISPLAY_HEIGHT: u16 = 240;
-const BUFFER_SIZE: usize = 480;
+const BUFFER_SIZE: usize = (DISPLAY_WIDTH as usize) * (DISPLAY_HEIGHT as usize) * 2;
 
 enum Operation {
     Command(u8),
@@ -24,11 +24,17 @@ pub struct Display {
     spi: SpiInterface,
     dc: Output<'static>,
     rst: Output<'static>,
+    buffer: [u8; BUFFER_SIZE],
 }
 
 impl Display {
     pub fn new(spi: SpiInterface, dc: Output<'static>, rst: Output<'static>) -> Self {
-        Self { spi, dc, rst }
+        Self {
+            spi,
+            dc,
+            rst,
+            buffer: [0; BUFFER_SIZE],
+        }
     }
 
     pub async fn begin(&mut self) -> Result<(), DisplayError> {
@@ -156,17 +162,30 @@ impl Display {
     }
 
     pub fn set_pixel(&mut self, x: u16, y: u16, color: u16) {
-        // debug!("Setting pixel at ({}, {}) to color 0x{:04X}", x, y, color);
+        let index = ((y as usize) * (DISPLAY_WIDTH as usize) + (x as usize)) * 2;
 
-        // self.set_frame(x, y, x, y).await?;
+        self.buffer[index] = (color >> 8) as u8;
+        self.buffer[index + 1] = (color & 0xFF) as u8;
+    }
 
-        // let hi = (color >> 8) as u8;
-        // let lo = (color & 0xFF) as u8;
+    pub async fn set_background(&mut self, color: u16) -> Result<(), DisplayError> {
+        debug!("Setting background color: 0x{:04X}", color);
 
-        // self.write_data(&[hi, lo]).await?;
+        for i in 0..BUFFER_SIZE / 2 {
+            self.buffer[i * 2] = (color >> 8) as u8;
+            self.buffer[i * 2 + 1] = (color & 0xFF) as u8;
+        }
+
+        Ok(())
     }
 
     pub async fn render(&mut self) -> Result<(), DisplayError> {
+        self.set_frame(0, 0, DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1)
+            .await?;
+
+        self.dc.set_high();
+        self.spi.write(&self.buffer).await?;
+
         Ok(())
     }
 }

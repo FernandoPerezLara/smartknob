@@ -1,7 +1,5 @@
 use super::Figure;
-use crate::peripherals::display::{
-    BUFFER_SIZE, DISPLAY_HEIGHT, DISPLAY_WIDTH, Display, DisplayError,
-};
+use crate::peripherals::display::Display;
 use log::debug;
 
 pub struct Line {
@@ -104,31 +102,5 @@ impl Display {
         T: Figure,
     {
         shape.draw(self);
-    }
-
-    pub async fn set_background(&mut self, color: u16) -> Result<(), DisplayError> {
-        debug!("Setting background color: 0x{:04X}", color);
-
-        self.sleep().await?;
-
-        self.set_frame(0, 0, DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1)
-            .await?;
-
-        let hi = (color >> 8) as u8;
-        let lo = (color & 0xFF) as u8;
-
-        let mut buffer = [0u8; BUFFER_SIZE];
-        for i in (0..BUFFER_SIZE).step_by(2) {
-            buffer[i] = hi;
-            buffer[i + 1] = lo;
-        }
-
-        for _row in 0..DISPLAY_HEIGHT {
-            self.write_data(&buffer).await?;
-        }
-
-        self.wake().await?;
-
-        Ok(())
     }
 }
