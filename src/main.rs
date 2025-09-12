@@ -12,7 +12,7 @@ esp_bootloader_esp_idf::esp_app_desc!();
 async fn main(_spawner: Spawner) {
     esp_alloc::heap_allocator!(200 * 1024);
 
-    esp_println::logger::init_logger(log::LevelFilter::Debug);
+    esp_println::logger::init_logger_from_env();
 
     let mut app = match App::new().await {
         Ok(app) => {

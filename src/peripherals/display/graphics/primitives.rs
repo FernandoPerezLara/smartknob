@@ -95,12 +95,3 @@ impl Figure for Circle {
         display.set_pixel(self.x - self.radius, self.y, self.color);
     }
 }
-
-impl Display {
-    pub fn draw<T>(&mut self, shape: &T)
-    where
-        T: Figure,
-    {
-        shape.draw(self);
-    }
-}

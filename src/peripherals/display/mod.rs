@@ -169,18 +169,18 @@ impl Display {
         self.buffer[index + 1] = (color & 0xFF) as u8;
     }
 
-    pub async fn set_background(&mut self, color: u16) -> Result<(), DisplayError> {
+    pub fn set_background(&mut self, color: u16) {
         debug!("Setting background color: 0x{:04X}", color);
 
         for i in 0..BUFFER_SIZE / 2 {
             self.buffer[i * 2] = (color >> 8) as u8;
             self.buffer[i * 2 + 1] = (color & 0xFF) as u8;
         }
-
-        Ok(())
     }
 
     pub async fn render(&mut self) -> Result<(), DisplayError> {
+        debug!("Rendering buffer to display");
+
         self.set_frame(0, 0, DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1)
             .await?;
 
