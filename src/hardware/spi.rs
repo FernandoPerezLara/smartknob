@@ -8,7 +8,7 @@ use esp_hal::time::Rate;
 use esp_hal::{Async, dma_buffers};
 use log::debug;
 
-const DMA_BUFFER_SIZE: usize = 240 * 240 * 2;
+const DMA_BUFFER_SIZE: usize = 32000;
 
 pub struct SpiInterface {
     spi: SpiDmaBus<'static, Async>,
@@ -75,10 +75,6 @@ impl SpiInterface {
         self.cs.set_low();
 
         let result = SpiBus::write(&mut self.spi, data).await;
-
-        if result.is_ok() {
-            let _ = SpiBus::flush(&mut self.spi).await;
-        }
 
         self.cs.set_high();
 

@@ -11,5 +11,8 @@ rustflags = [
 ]
 runner = "espflash flash --monitor"
 
+[env]
+ESP_LOG = "info"
+
 [unstable]
-build-std = [ "core" ]
+build-std = [ "alloc", "core" ]

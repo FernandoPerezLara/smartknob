@@ -6,6 +6,7 @@ pub mod graphics;
 use self::config::CONFIG;
 use self::error::DisplayError;
 use crate::hardware::spi::SpiInterface;
+use alloc::boxed::Box;
 use embassy_time::{Duration, Timer};
 use esp_hal::gpio::Output;
 use log::{debug, info};
@@ -24,7 +25,7 @@ pub struct Display {
     spi: SpiInterface,
     dc: Output<'static>,
     rst: Output<'static>,
-    buffer: [u8; BUFFER_SIZE],
+    buffer: Box<[u8; BUFFER_SIZE]>,
 }
 
 impl Display {
@@ -33,7 +34,7 @@ impl Display {
             spi,
             dc,
             rst,
-            buffer: [0; BUFFER_SIZE],
+            buffer: Box::new([0; BUFFER_SIZE]),
         }
     }
 
@@ -184,7 +185,7 @@ impl Display {
             .await?;
 
         self.dc.set_high();
-        self.spi.write(&self.buffer).await?;
+        self.spi.write(self.buffer.as_slice()).await?;
 
         Ok(())
     }

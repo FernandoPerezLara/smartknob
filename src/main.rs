@@ -2,14 +2,16 @@
 #![no_main]
 
 use embassy_executor::Spawner;
-use esp_backtrace as _;
 use log::{error, info, warn};
 use smartknob::App;
+use {esp_alloc as _, esp_backtrace as _};
 
 esp_bootloader_esp_idf::esp_app_desc!();
 
 #[esp_hal_embassy::main]
 async fn main(_spawner: Spawner) {
+    esp_alloc::heap_allocator!(200 * 1024);
+
     esp_println::logger::init_logger(log::LevelFilter::Debug);
 
     let mut app = match App::new().await {
