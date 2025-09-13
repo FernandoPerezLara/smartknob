@@ -29,7 +29,7 @@ impl Hardware {
         esp_hal_embassy::init(timer.alarm0);
 
         let display_spi = SpiInterface::new(
-            40,
+            80,
             Mode::_0,
             peripherals.SPI2,
             peripherals.DMA_CH0,
