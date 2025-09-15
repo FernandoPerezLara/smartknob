@@ -1,5 +1,7 @@
+mod color;
 mod primitives;
 
+pub use self::color::Color;
 pub use self::primitives::FilledCircle;
 use crate::peripherals::display::error::DisplayError;
 use crate::peripherals::display::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Display};

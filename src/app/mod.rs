@@ -1,7 +1,7 @@
 use crate::error::SmartknobError;
 use crate::hardware::Hardware;
 use crate::peripherals::display::Display;
-use crate::peripherals::display::graphics::FilledCircle;
+use crate::peripherals::display::graphics::{Color, FilledCircle};
 use core::f32;
 use libm::{cosf, sinf};
 use log::{debug, error, info};
@@ -36,7 +36,10 @@ impl App {
             },
         }
 
-        self.display.clear(0x0000);
+        const BLACK: Color = Color::BLACK;
+        const WHITE: Color = Color::WHITE;
+
+        self.display.clear(BLACK);
         self.display.render().await?;
 
         let mut position = 0;
@@ -44,7 +47,7 @@ impl App {
 
         info!("Starting main loop");
         loop {
-            self.display.clear(0x0000);
+            self.display.clear(BLACK);
 
             let angle = (position * 2) as f32 * f32::consts::PI / 180.0 - f32::consts::PI / 2.0;
             let x = 120.0 + (radius as f32) * cosf(angle);
@@ -54,7 +57,7 @@ impl App {
                 x: x as u16,
                 y: y as u16,
                 diameter: 12,
-                color: 0xFFFF,
+                color: WHITE,
             });
 
             position += 1;

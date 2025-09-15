@@ -5,6 +5,7 @@ pub mod graphics;
 
 use self::config::CONFIG;
 use self::error::DisplayError;
+use self::graphics::Color;
 use crate::hardware::spi::SpiInterface;
 use alloc::boxed::Box;
 use embassy_time::{Duration, Timer};
@@ -169,12 +170,14 @@ impl Display {
         self.buffer[index + 1] = (color & 0xFF) as u8;
     }
 
-    pub fn clear(&mut self, color: u16) {
-        debug!("Setting background color: 0x{:04X}", color);
+    pub fn clear(&mut self, color: Color) {
+        debug!("Setting background color: {:?}", color);
+
+        let color_u16: u16 = color.into();
 
         for i in 0..BUFFER_SIZE / 2 {
-            self.buffer[i * 2] = (color >> 8) as u8;
-            self.buffer[i * 2 + 1] = (color & 0xFF) as u8;
+            self.buffer[i * 2] = (color_u16 >> 8) as u8;
+            self.buffer[i * 2 + 1] = (color_u16 & 0xFF) as u8;
         }
     }
 
