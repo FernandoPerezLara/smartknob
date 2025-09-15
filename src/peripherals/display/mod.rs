@@ -169,7 +169,7 @@ impl Display {
         self.buffer[index + 1] = (color & 0xFF) as u8;
     }
 
-    pub fn set_background(&mut self, color: u16) {
+    pub fn clear(&mut self, color: u16) {
         debug!("Setting background color: 0x{:04X}", color);
 
         for i in 0..BUFFER_SIZE / 2 {

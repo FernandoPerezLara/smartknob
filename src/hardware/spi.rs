@@ -46,7 +46,6 @@ impl SpiInterface {
             .with_frequency(Rate::from_mhz(frequency))
             .with_mode(mode);
 
-        #[allow(clippy::manual_div_ceil)]
         let (rx_buffer, rx_descriptors, tx_buffer, tx_descriptors) = dma_buffers!(DMA_BUFFER_SIZE);
         let dma_rx_buf = DmaRxBuf::new(rx_descriptors, rx_buffer)?;
         let dma_tx_buf = DmaTxBuf::new(tx_descriptors, tx_buffer)?;

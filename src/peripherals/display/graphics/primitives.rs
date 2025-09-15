@@ -1,5 +1,8 @@
 use super::Figure;
 use crate::peripherals::display::Display;
+use embedded_graphics::pixelcolor::Rgb565;
+use embedded_graphics::prelude::{Drawable, Point, Primitive};
+use embedded_graphics::primitives::{Circle as EgCircle, Line as EgLine, PrimitiveStyle};
 use log::debug;
 
 pub struct Line {
@@ -17,41 +20,24 @@ impl Figure for Line {
             self.x1, self.y1, self.x2, self.y2, self.color
         );
 
-        let dx = (self.x2 as i32 - self.x1 as i32).abs();
-        let dy = (self.y2 as i32 - self.y1 as i32).abs();
-        let sx = if self.x1 < self.x2 { 1 } else { -1 };
-        let sy = if self.y1 < self.y2 { 1 } else { -1 };
-        let mut err = dx - dy;
+        let start = Point::new(self.x1 as i32, self.y1 as i32);
+        let end = Point::new(self.x2 as i32, self.y2 as i32);
+        let color = Rgb565::new(
+            ((self.color >> 11) & 0x1F) as u8,
+            ((self.color >> 5) & 0x3F) as u8,
+            (self.color & 0x1F) as u8,
+        );
 
-        let mut x = self.x1;
-        let mut y = self.y1;
+        let line = EgLine::new(start, end).into_styled(PrimitiveStyle::with_stroke(color, 1));
 
-        loop {
-            display.set_pixel(x, y, self.color);
-
-            if x == self.x2 && y == self.y2 {
-                break;
-            }
-
-            let err2 = err * 2;
-
-            if err2 > -dy {
-                err -= dy;
-                x += sx as u16;
-            }
-
-            if err2 < dx {
-                err += dx;
-                y += sy as u16;
-            }
-        }
+        let _ = line.draw(display);
     }
 }
 
 pub struct Circle {
     pub x: u16,
     pub y: u16,
-    pub radius: u16,
+    pub diameter: u16,
     pub color: u16,
 }
 
@@ -59,39 +45,47 @@ impl Figure for Circle {
     fn draw(&self, display: &mut Display) {
         debug!(
             "Drawing circle at ({}, {}) with radius {} and color 0x{:04X}",
-            self.x, self.y, self.radius, self.color
+            self.x, self.y, self.diameter, self.color
         );
 
-        let mut f = 1 - self.radius as i32;
-        let mut dd_f_x = 1;
-        let mut dd_f_y = -2 * self.radius as i32;
-        let mut x1 = 0;
-        let mut y1 = self.radius as i32;
+        let center = Point::new(self.x as i32, self.y as i32);
+        let color = Rgb565::new(
+            ((self.color >> 11) & 0x1F) as u8,
+            ((self.color >> 5) & 0x3F) as u8,
+            (self.color & 0x1F) as u8,
+        );
 
-        while x1 < y1 {
-            if f >= 0 {
-                y1 -= 1;
-                dd_f_y += 2;
-                f += dd_f_y;
-            }
+        let circle = EgCircle::with_center(center, self.diameter as u32)
+            .into_styled(PrimitiveStyle::with_stroke(color, 1));
 
-            x1 += 1;
-            dd_f_x += 2;
-            f += dd_f_x;
+        let _ = circle.draw(display);
+    }
+}
 
-            display.set_pixel(self.x + x1 as u16, self.y + y1 as u16, self.color);
-            display.set_pixel(self.x - x1 as u16, self.y + y1 as u16, self.color);
-            display.set_pixel(self.x + x1 as u16, self.y - y1 as u16, self.color);
-            display.set_pixel(self.x - x1 as u16, self.y - y1 as u16, self.color);
-            display.set_pixel(self.x + y1 as u16, self.y + x1 as u16, self.color);
-            display.set_pixel(self.x - y1 as u16, self.y + x1 as u16, self.color);
-            display.set_pixel(self.x + y1 as u16, self.y - x1 as u16, self.color);
-            display.set_pixel(self.x - y1 as u16, self.y - x1 as u16, self.color);
-        }
+pub struct FilledCircle {
+    pub x: u16,
+    pub y: u16,
+    pub diameter: u16,
+    pub color: u16,
+}
 
-        display.set_pixel(self.x, self.y + self.radius, self.color);
-        display.set_pixel(self.x, self.y - self.radius, self.color);
-        display.set_pixel(self.x + self.radius, self.y, self.color);
-        display.set_pixel(self.x - self.radius, self.y, self.color);
+impl Figure for FilledCircle {
+    fn draw(&self, display: &mut Display) {
+        debug!(
+            "Drawing filled circle at ({}, {}) with radius {} and color 0x{:04X}",
+            self.x, self.y, self.diameter, self.color
+        );
+
+        let center = Point::new(self.x as i32, self.y as i32);
+        let color = Rgb565::new(
+            ((self.color >> 11) & 0x1F) as u8,
+            ((self.color >> 5) & 0x3F) as u8,
+            (self.color & 0x1F) as u8,
+        );
+
+        let circle = EgCircle::with_center(center, self.diameter as u32)
+            .into_styled(PrimitiveStyle::with_fill(color));
+
+        let _ = circle.draw(display);
     }
 }

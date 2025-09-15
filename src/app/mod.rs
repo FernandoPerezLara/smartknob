@@ -1,8 +1,9 @@
 use crate::error::SmartknobError;
 use crate::hardware::Hardware;
 use crate::peripherals::display::Display;
-use crate::peripherals::display::graphics::{Circle, Line};
-use embassy_time::{Duration, Timer};
+use crate::peripherals::display::graphics::FilledCircle;
+use core::f32;
+use libm::{cosf, sinf};
 use log::{debug, error, info};
 
 pub struct App {
@@ -35,31 +36,34 @@ impl App {
             },
         }
 
-        match self.display.set_background(0xF800).await {
-            Ok(_) => info!("Screen filled successfully"),
-            Err(e) => error!("Failed to fill screen: {}", e),
-        }
-        let circle = Circle {
-            x: 119,
-            y: 119,
-            radius: 50,
-            color: 0x001F,
-        };
-        self.display.draw(&circle);
-        let line = Line {
-            x1: 0,
-            y1: 0,
-            x2: 239,
-            y2: 239,
-            color: 0x07E0,
-        };
-        self.display.draw(&line);
-
+        self.display.clear(0x0000);
         self.display.render().await?;
+
+        let mut position = 0;
+        let radius = 120 - 5 - 10;
 
         info!("Starting main loop");
         loop {
-            Timer::after(Duration::from_millis(1000)).await;
+            self.display.clear(0x0000);
+
+            let angle = (position * 2) as f32 * f32::consts::PI / 180.0 - f32::consts::PI / 2.0;
+            let x = 120.0 + (radius as f32) * cosf(angle);
+            let y = 120.0 + (radius as f32) * sinf(angle);
+
+            self.display.draw(&FilledCircle {
+                x: x as u16,
+                y: y as u16,
+                diameter: 12,
+                color: 0xFFFF,
+            });
+
+            position += 1;
+
+            if position > 180 {
+                position = 0;
+            }
+
+            self.display.render().await?;
         }
     }
 }
