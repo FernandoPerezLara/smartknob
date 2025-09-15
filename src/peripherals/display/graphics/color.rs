@@ -1,7 +1,14 @@
+use core::fmt;
 use embedded_graphics::pixelcolor::Rgb565;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct Color(pub u8, pub u8, pub u8);
+
+impl fmt::Debug for Color {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {}, {})", self.0, self.1, self.2)
+    }
+}
 
 impl Color {
     pub const fn to_rgb565(&self) -> u16 {
