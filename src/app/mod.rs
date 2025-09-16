@@ -1,7 +1,8 @@
 use crate::error::SmartknobError;
 use crate::hardware::Hardware;
 use crate::peripherals::display::Display;
-use crate::peripherals::display::graphics::{Color, FilledCircle};
+use crate::peripherals::display::graphics::{Alignment, Color, FilledCircle, Text};
+use alloc::string::ToString;
 use core::f32;
 use libm::{cosf, sinf};
 use log::{debug, error, info};
@@ -57,6 +58,14 @@ impl App {
                 x: x as u16,
                 y: y as u16,
                 diameter: 12,
+                color: WHITE,
+            });
+
+            self.display.draw(&Text {
+                content: position.to_string(),
+                x: 120,
+                y: 120,
+                alignment: Alignment::Center,
                 color: WHITE,
             });
 

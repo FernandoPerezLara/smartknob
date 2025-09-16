@@ -1,4 +1,4 @@
-use super::{Color, Figure};
+use super::{Color, Graphic};
 use crate::peripherals::display::Display;
 use embedded_graphics::prelude::{Drawable, Point, Primitive};
 use embedded_graphics::primitives::{Circle as EgCircle, PrimitiveStyle};
@@ -11,7 +11,7 @@ pub struct FilledCircle {
     pub color: Color,
 }
 
-impl Figure for FilledCircle {
+impl Graphic for FilledCircle {
     fn draw(&self, display: &mut Display) {
         debug!(
             "Drawing filled circle at ({}, {}) with radius {} and color {:?}",

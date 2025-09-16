@@ -1,8 +1,10 @@
 mod color;
 mod primitives;
+mod text;
 
 pub use self::color::Color;
 pub use self::primitives::FilledCircle;
+pub use self::text::{Alignment, Text};
 use crate::peripherals::display::error::DisplayError;
 use crate::peripherals::display::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Display};
 use embedded_graphics::pixelcolor::Rgb565;
@@ -39,14 +41,14 @@ impl DrawTarget for Display {
     }
 }
 
-pub trait Figure {
+pub trait Graphic {
     fn draw(&self, display: &mut Display);
 }
 
 impl Display {
     pub fn draw<T>(&mut self, shape: &T)
     where
-        T: Figure,
+        T: Graphic,
     {
         shape.draw(self);
     }
