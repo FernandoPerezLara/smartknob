@@ -1,11 +1,14 @@
-use crate::error::SmartknobError;
-use crate::hardware::Hardware;
-use crate::peripherals::display::Display;
-use crate::peripherals::display::graphics::Color;
-use crate::ui::{LightView, View, ViewManager};
 use alloc::boxed::Box;
+
 use embassy_time::{Duration, Timer};
 use log::{debug, error, info};
+
+use crate::{
+    error::SmartknobError,
+    hardware::Hardware,
+    peripherals::display::{Display, graphics::Color},
+    ui::{LightView, View, ViewManager},
+};
 
 pub struct App {
     display: Display,

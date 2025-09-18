@@ -1,6 +1,6 @@
-use crate::hardware::error::HardwareError;
-use crate::peripherals::display::error::DisplayError;
 use core::fmt;
+
+use crate::{hardware::error::HardwareError, peripherals::display::error::DisplayError};
 
 #[derive(Debug)]
 pub enum SmartknobError {

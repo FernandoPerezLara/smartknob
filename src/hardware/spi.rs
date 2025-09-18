@@ -1,12 +1,18 @@
-use super::error::SpiError;
 use embedded_hal_async::spi::SpiBus;
-use esp_hal::dma::{AnyGdmaChannel, DmaChannelConvert, DmaChannelFor, DmaRxBuf, DmaTxBuf};
-use esp_hal::gpio::{InputPin, Output, OutputPin};
-use esp_hal::spi::Mode;
-use esp_hal::spi::master::{Config, Instance, Spi, SpiDmaBus};
-use esp_hal::time::Rate;
-use esp_hal::{Async, dma_buffers};
+use esp_hal::{
+    Async,
+    dma::{AnyGdmaChannel, DmaChannelConvert, DmaChannelFor, DmaRxBuf, DmaTxBuf},
+    dma_buffers,
+    gpio::{InputPin, Output, OutputPin},
+    spi::{
+        Mode,
+        master::{Config, Instance, Spi, SpiDmaBus},
+    },
+    time::Rate,
+};
 use log::debug;
+
+use super::error::SpiError;
 
 const DMA_BUFFER_SIZE: usize = 4096;
 

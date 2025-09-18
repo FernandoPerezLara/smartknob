@@ -1,13 +1,15 @@
 pub mod error;
 pub mod spi;
 
-use self::error::HardwareError;
-use self::spi::SpiInterface;
-use esp_hal::gpio::{Level, Output, OutputConfig};
-use esp_hal::peripherals::Peripherals;
-use esp_hal::spi::Mode;
-use esp_hal::timer::systimer::SystemTimer;
+use esp_hal::{
+    gpio::{Level, Output, OutputConfig},
+    peripherals::Peripherals,
+    spi::Mode,
+    timer::systimer::SystemTimer,
+};
 use log::{debug, info};
+
+use self::{error::HardwareError, spi::SpiInterface};
 
 pub struct Pins {
     pub display_dc: Output<'static>,

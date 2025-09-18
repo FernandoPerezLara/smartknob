@@ -2,9 +2,10 @@
 #![no_main]
 
 use embassy_executor::Spawner;
+use esp_alloc as _;
+use esp_backtrace as _;
 use log::{error, info, warn};
 use smartknob::App;
-use {esp_alloc as _, esp_backtrace as _};
 
 esp_bootloader_esp_idf::esp_app_desc!();
 

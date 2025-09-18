@@ -1,9 +1,10 @@
 mod views;
 
-use crate::peripherals::display::Display;
-use alloc::boxed::Box;
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
+
 pub use views::{LightView, View};
+
+use crate::peripherals::display::Display;
 
 #[derive(Default)]
 pub struct ViewManager {

@@ -1,4 +1,5 @@
 use core::fmt;
+
 use embedded_graphics::pixelcolor::Rgb565;
 
 #[derive(Clone, Copy)]

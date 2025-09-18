@@ -2,15 +2,17 @@ mod color;
 mod primitives;
 mod text;
 
-pub use self::color::Color;
-pub use self::primitives::FilledCircle;
-pub use self::text::{Alignment, Text};
-use crate::peripherals::display::error::DisplayError;
-use crate::peripherals::display::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Display};
-use embedded_graphics::pixelcolor::Rgb565;
-use embedded_graphics::prelude::{
-    Dimensions, DrawTarget, IntoStorage, OriginDimensions, Pixel, Size,
+use embedded_graphics::{
+    pixelcolor::Rgb565,
+    prelude::{Dimensions, DrawTarget, IntoStorage, OriginDimensions, Pixel, Size},
 };
+
+pub use self::{
+    color::Color,
+    primitives::FilledCircle,
+    text::{Alignment, Text},
+};
+use crate::peripherals::display::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Display, error::DisplayError};
 
 impl OriginDimensions for Display {
     fn size(&self) -> Size {

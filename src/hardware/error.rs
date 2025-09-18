@@ -1,6 +1,6 @@
 use core::fmt;
-use esp_hal::dma::DmaBufError as SpiBufError;
-use esp_hal::spi::master::ConfigError as SpiConfigError;
+
+use esp_hal::{dma::DmaBufError as SpiBufError, spi::master::ConfigError as SpiConfigError};
 
 #[derive(Debug)]
 pub enum HardwareError {

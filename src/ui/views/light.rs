@@ -1,6 +1,7 @@
+use alloc::string::{String, ToString};
+
 use super::{Display, View};
 use crate::peripherals::display::graphics::{Alignment, Color, Text};
-use alloc::string::{String, ToString};
 
 pub struct LightView {
     name: String,

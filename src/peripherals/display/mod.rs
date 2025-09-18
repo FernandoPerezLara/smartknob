@@ -3,14 +3,14 @@ mod config;
 pub mod error;
 pub mod graphics;
 
-use self::config::CONFIG;
-use self::error::DisplayError;
-use self::graphics::Color;
-use crate::hardware::spi::SpiInterface;
 use alloc::boxed::Box;
+
 use embassy_time::{Duration, Timer};
 use esp_hal::gpio::Output;
 use log::{debug, info};
+
+use self::{config::CONFIG, error::DisplayError, graphics::Color};
+use crate::hardware::spi::SpiInterface;
 
 const DISPLAY_WIDTH: u16 = 240;
 const DISPLAY_HEIGHT: u16 = 240;

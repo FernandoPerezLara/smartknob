@@ -1,12 +1,15 @@
+use alloc::string::String;
+
+pub use embedded_graphics::text::Alignment;
+use embedded_graphics::{
+    mono_font::{MonoTextStyle, ascii::FONT_10X20},
+    prelude::{Drawable as EgDrawable, Point},
+    text::{Baseline, LineHeight, Text as EgText, TextStyleBuilder},
+};
+use log::debug;
+
 use super::{Color, Graphic};
 use crate::peripherals::display::Display;
-use alloc::string::String;
-use embedded_graphics::mono_font::MonoTextStyle;
-use embedded_graphics::mono_font::ascii::FONT_10X20;
-use embedded_graphics::prelude::{Drawable as EgDrawable, Point};
-pub use embedded_graphics::text::Alignment;
-use embedded_graphics::text::{Baseline, LineHeight, Text as EgText, TextStyleBuilder};
-use log::debug;
 
 pub struct Text {
     pub content: String,

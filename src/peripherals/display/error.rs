@@ -1,5 +1,6 @@
-use crate::hardware::error::SpiError;
 use core::fmt;
+
+use crate::hardware::error::SpiError;
 
 #[derive(Debug)]
 pub enum DisplayError {

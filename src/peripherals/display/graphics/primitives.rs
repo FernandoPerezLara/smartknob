@@ -1,8 +1,11 @@
+use embedded_graphics::{
+    prelude::{Drawable, Point, Primitive},
+    primitives::{Circle as EgCircle, PrimitiveStyle},
+};
+use log::debug;
+
 use super::{Color, Graphic};
 use crate::peripherals::display::Display;
-use embedded_graphics::prelude::{Drawable, Point, Primitive};
-use embedded_graphics::primitives::{Circle as EgCircle, PrimitiveStyle};
-use log::debug;
 
 pub struct FilledCircle {
     pub x: u16,

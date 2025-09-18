@@ -2,13 +2,16 @@
 format_strings = true
 
 # Group the imports by their kind: std first, then external crates, then local imports.
-group_imports = "One"
+group_imports = "StdExternalCrate"
 
 # Use uppercase for hexadecimal literals.
 hex_literal_case = "Upper"
 
-# Only merge imports if they're from the same module.
-imports_granularity = "Module"
+# Merge imports from the same crate into a single use statement.
+imports_granularity = "Crate"
+
+# Reorder imports alphabetically.
+reorder_imports = true
 
 # Put a trailing comma after the last item in a block if it is not empty.
 match_block_trailing_comma = true
