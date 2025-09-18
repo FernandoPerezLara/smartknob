@@ -23,4 +23,12 @@ impl ViewManager {
             view.render(display);
         }
     }
+
+    pub fn len(&self) -> usize {
+        self.views.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.views.is_empty()
+    }
 }

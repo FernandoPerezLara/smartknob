@@ -27,8 +27,8 @@ impl App {
         debug!("Display interface created successfully");
 
         let mut view = ViewManager::new();
-        view.add(Box::new(LightView::new("Luz 1")));
-        view.add(Box::new(LightView::new("Luz 2")));
+        view.add(Box::new(LightView::new("Luz Dormitorio")));
+        view.add(Box::new(LightView::new("Luz Salon")));
 
         Ok(Self { display, view })
     }
@@ -56,7 +56,7 @@ impl App {
             self.view.select(index, &mut self.display);
             self.display.render().await?;
             index += 1;
-            if index > 1 {
+            if index > self.view.len() {
                 index = 0;
             }
             Timer::after(Duration::from_millis(1000)).await;
