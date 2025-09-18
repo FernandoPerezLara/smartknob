@@ -5,13 +5,14 @@ use alloc::boxed::Box;
 use alloc::vec::Vec;
 pub use views::{LightView, View};
 
+#[derive(Default)]
 pub struct ViewManager {
     views: Vec<Box<dyn View>>,
 }
 
 impl ViewManager {
     pub fn new() -> Self {
-        Self { views: Vec::new() }
+        Self::default()
     }
 
     pub fn add(&mut self, view: Box<dyn View>) {
