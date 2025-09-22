@@ -8,8 +8,7 @@ use embedded_graphics::{
 };
 use log::debug;
 
-use super::{Color, Graphic};
-use crate::peripherals::display::Display;
+use super::{Color, Display, Graphic};
 
 pub struct Text {
     pub content: String,

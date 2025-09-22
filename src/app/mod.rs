@@ -59,7 +59,7 @@ impl App {
             self.view.select(index, &mut self.display);
             self.display.render().await?;
             index += 1;
-            if index > self.view.len() {
+            if index >= self.view.len() {
                 index = 0;
             }
             Timer::after(Duration::from_millis(1000)).await;
