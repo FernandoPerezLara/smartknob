@@ -14,16 +14,19 @@ RUN rustup target add riscv32imac-unknown-none-elf --toolchain nightly
 WORKDIR /app
 
 # Copy Rust configuration files
-COPY rust-toolchain.toml rustfmt.toml build.rs ./
+COPY rust-toolchain.toml rustfmt.toml ./
 
 # Cache dependencies
 COPY Cargo.toml Cargo.lock ./
 RUN mkdir -p src && echo "fn main() {}" > src/main.rs
+RUN mkdir -p build && echo "fn main() {}" > build/main.rs
 RUN cargo fetch
-RUN rm -rf src/
+RUN rm -rf src/ build/
 
-# Copy source code
+# Copy project files
 COPY src/ ./src/
+COPY build/ ./build/
+COPY assets/ ./assets/
 
 # Default command
 CMD ["cargo", "+nightly", "check", "--release"]
