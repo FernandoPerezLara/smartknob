@@ -1,3 +1,5 @@
+pub mod fonts;
+
 use std::path::Path;
 
 pub trait AssetBuilder {

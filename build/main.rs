@@ -1,9 +1,8 @@
-mod builder;
-mod fonts;
+mod assets;
 
 use std::path::Path;
 
-use crate::{builder::AssetBuilder, fonts::FontBuilder};
+use assets::{AssetBuilder, fonts::FontBuilder};
 
 fn main() {
     let path = std::env::var("OUT_DIR").expect("OUT_DIR not set");
