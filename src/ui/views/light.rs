@@ -1,7 +1,7 @@
 use alloc::string::{String, ToString};
 
 use super::{Display, View};
-use crate::peripherals::display::graphics::{Alignment, Color, Text};
+use crate::peripherals::display::graphics::{Color, Text};
 
 pub struct LightView {
     name: String,
@@ -19,7 +19,6 @@ impl View for LightView {
             content: self.name.clone(),
             x: 120,
             y: 120,
-            alignment: Alignment::Center,
             color: Color::WHITE,
         };
 

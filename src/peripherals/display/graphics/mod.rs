@@ -7,11 +7,7 @@ use embedded_graphics::{
     prelude::{Dimensions, DrawTarget, IntoStorage, OriginDimensions, Pixel, Size},
 };
 
-pub use self::{
-    color::Color,
-    primitives::FilledCircle,
-    text::{Alignment, Text},
-};
+pub use self::{color::Color, primitives::FilledCircle, text::Text};
 use crate::peripherals::display::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Display, error::DisplayError};
 
 impl OriginDimensions for Display {

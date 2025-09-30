@@ -30,8 +30,7 @@ impl App {
         debug!("Display interface created successfully");
 
         let mut view = ViewManager::new();
-        view.add(Box::new(LightView::new("Luz Dormitorio")));
-        view.add(Box::new(LightView::new("Luz Salon")));
+        view.add(Box::new(LightView::new("Bedroom")));
 
         Ok(Self { display, view })
     }
@@ -45,23 +44,12 @@ impl App {
             },
         }
 
-        const BLACK: Color = Color::BLACK;
-
-        self.display.clear(BLACK);
+        self.display.clear(Color::BLACK);
         self.view.select(0, &mut self.display);
         self.display.render().await?;
 
-        let mut index = 0;
-
         info!("Starting main loop");
         loop {
-            self.display.clear(BLACK);
-            self.view.select(index, &mut self.display);
-            self.display.render().await?;
-            index += 1;
-            if index >= self.view.len() {
-                index = 0;
-            }
             Timer::after(Duration::from_millis(1000)).await;
         }
     }

@@ -14,7 +14,6 @@ pub struct Text {
     pub content: String,
     pub x: u16,
     pub y: u16,
-    pub alignment: Alignment,
     pub color: Color,
 }
 
