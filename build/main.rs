@@ -1,13 +1,9 @@
-use std::path::Path;
-
-use crate::fonts::FontBuilder;
-
+mod builder;
 mod fonts;
 
-pub trait AssetBuilder {
-    fn new(path: impl AsRef<Path>) -> Self;
-    fn run(&self);
-}
+use std::path::Path;
+
+use crate::{builder::AssetBuilder, fonts::FontBuilder};
 
 fn main() {
     let path = std::env::var("OUT_DIR").expect("OUT_DIR not set");
