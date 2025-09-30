@@ -1,3 +1,5 @@
+# TODO: Check if these tasks can be run with xtask instead of docker-compose
+
 services:
   lint:
     build: .

@@ -8,6 +8,7 @@ rustflags = [
   "-C", "link-arg=--ldproxy-linker",
   "-C", "link-arg=rust-lld",
   "-C", "force-frame-pointers",
+  "-C", "link-arg=-Tlinkall.x",
 ]
 runner = "espflash flash --monitor"
 
