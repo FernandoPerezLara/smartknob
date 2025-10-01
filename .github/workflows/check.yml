@@ -1,4 +1,4 @@
-name: Build
+name: Check
 
 on:
   workflow_call:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build Check
+    name: Code Check
     runs-on: ubuntu-latest
 
     steps:
@@ -14,8 +14,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker compose build build
+        run: docker compose build check
 
-      - name: Run build release
+      - name: Run check
         run: |
-          docker compose run build
+          docker compose run check

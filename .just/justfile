@@ -1,0 +1,18 @@
+# Formatting commands
+mod fmt
+
+# Build for ESP32 in release mode
+build:
+  @cargo +nightly build --release
+
+# Clean all build artifacts
+clean:
+  @cargo clean
+
+# Run clippy check with strict warnings
+check:
+  @cargo +nightly clippy --release -- -D warnings
+
+# Build and flash to device
+run log="info":
+  @RUST_LOG={{log}} cargo run --release

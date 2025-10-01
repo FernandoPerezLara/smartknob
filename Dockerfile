@@ -10,11 +10,16 @@ RUN rustup toolchain install nightly
 RUN rustup component add rustfmt clippy --toolchain nightly
 RUN rustup target add riscv32imac-unknown-none-elf --toolchain nightly
 
+# Install Just
+RUN cargo install just
+
 # Set working directory
 WORKDIR /app
 
 # Copy Rust configuration files
 COPY rust-toolchain.toml rustfmt.toml ./
+COPY justfile ./
+COPY .just/ ./.just/
 
 # Cache dependencies
 COPY Cargo.toml Cargo.lock ./
@@ -29,4 +34,4 @@ COPY build/ ./build/
 COPY assets/ ./assets/
 
 # Default command
-CMD ["cargo", "+nightly", "check", "--release"]
+CMD ["just", "check"]

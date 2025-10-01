@@ -7,11 +7,16 @@ on:
     branches: [ main ]
 
 jobs:
-  lint:
-    name: Lint Check
-    uses: ./.github/workflows/lint.yml
+  format:
+    name: Code Formatting
+    uses: ./.github/workflows/format.yml
+
+  check:
+    name: Code Check
+    needs: format
+    uses: ./.github/workflows/check.yml
 
   build:
-    name: Build Check
-    needs: lint
+    name: Build Release
+    needs: check
     uses: ./.github/workflows/build.yml
