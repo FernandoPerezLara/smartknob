@@ -1,0 +1,4 @@
+[fonts.primary]
+file = "inter-regular.ttf"
+size = 24
+charset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"

@@ -25,6 +25,11 @@ esp-bootloader-esp-idf = { git = "https://github.com/esp-rs/esp-hal", branch = "
 esp-println = { git = "https://github.com/esp-rs/esp-hal", branch = "main", features = ["log-04", "esp32c6"] }
 esp-alloc = { git = "https://github.com/esp-rs/esp-alloc", branch = "main" }
 
+[build-dependencies]
+fontdue = "0.9.3"
+serde = "1.0.228"
+toml = "0.9.7"
+
 [profile.release]
 opt-level = "s"
 lto = true
