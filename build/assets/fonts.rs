@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
     fs::{File, create_dir_all, read, read_to_string},
+    io::Write,
     path::{Path, PathBuf},
 };
 
@@ -55,6 +56,86 @@ impl AssetBuilder for FontBuilder {
             let mut output_path = self.output_path.join(&name);
             output_path.set_extension("bin");
             let mut output_file = File::create(&output_path).expect("Failed to create output file");
+
+            // Binary font file format:
+            //
+            // | Section        | Size                | Description                          |
+            // |----------------|---------------------|--------------------------------------|
+            // | Header         | 8 bytes             | char_count (u32), max_baseline (u32) |
+            // | Char Map       | char_count × 2      | Sorted u16 char codes (for lookup)   |
+            // | Glyph Metadata | char_count × 6      | width, height, xmin, ymin, offset    |
+            // | Bitmap Data    | Variable            | 4-bit antialiased pixels (packed)    |
+            //
+            // All multi-byte values are little-endian.
+            // Bitmap: 2 pixels/byte, first pixel in high nibble.
+
+            let mut chars: Vec<char> = config.charset.chars().collect();
+            chars.sort();
+            chars.dedup();
+
+            let max_baseline = chars
+                .iter()
+                .map(|&ch| font.metrics(ch, config.size as f32).ymin.abs())
+                .max()
+                .unwrap_or(0) as u32;
+
+            let mut char_map: Vec<u16> = Vec::new();
+            let mut glyph_metadata: Vec<u8> = Vec::new();
+            let mut bitmap_data: Vec<u8> = Vec::new();
+
+            for &ch in &chars {
+                char_map.push(ch as u16);
+
+                let (metrics, bitmap) = font.rasterize(ch, config.size as f32);
+
+                glyph_metadata.push(metrics.width as u8);
+                glyph_metadata.push(metrics.height as u8);
+                glyph_metadata.push(metrics.xmin as i8 as u8);
+                glyph_metadata.push(metrics.ymin as i8 as u8);
+
+                let offset = bitmap_data.len() as u16;
+                glyph_metadata.extend_from_slice(&offset.to_le_bytes());
+
+                let mut packed_bytes = Vec::new();
+                let mut current_byte = 0u8;
+                let mut pixel_count = 0;
+
+                for alpha in bitmap {
+                    let level = (alpha >> 4) & 0x0F;
+                    current_byte |= level << (4 - (pixel_count % 2) * 4);
+                    pixel_count += 1;
+
+                    if pixel_count % 2 == 0 {
+                        packed_bytes.push(current_byte);
+                        current_byte = 0;
+                    }
+                }
+
+                if pixel_count % 2 != 0 {
+                    packed_bytes.push(current_byte);
+                }
+
+                bitmap_data.extend(packed_bytes);
+            }
+
+            output_file
+                .write_all(&(chars.len() as u32).to_le_bytes())
+                .expect("Failed to write character count");
+            output_file
+                .write_all(&max_baseline.to_le_bytes())
+                .expect("Failed to write max baseline");
+
+            let char_map_bytes: Vec<u8> = char_map.iter().flat_map(|&c| c.to_le_bytes()).collect();
+            output_file
+                .write_all(&char_map_bytes)
+                .expect("Failed to write char map");
+
+            output_file
+                .write_all(&glyph_metadata)
+                .expect("Failed to write glyph metadata");
+            output_file
+                .write_all(&bitmap_data)
+                .expect("Failed to write bitmap data");
         }
     }
 }
