@@ -70,15 +70,10 @@ impl AssetBuilder for FontBuilder {
             // Bitmap: 2 pixels/byte, first pixel in high nibble.
 
             let mut chars: Vec<char> = config.charset.chars().collect();
-            chars.sort();
+            chars.sort_unstable();
             chars.dedup();
 
-            let max_baseline = chars
-                .iter()
-                .map(|&ch| font.metrics(ch, config.size as f32).ymin.abs())
-                .max()
-                .unwrap_or(0) as u32;
-
+            let mut max_baseline: i32 = 0;
             let mut char_map: Vec<u16> = Vec::new();
             let mut glyph_metadata: Vec<u8> = Vec::new();
             let mut bitmap_data: Vec<u8> = Vec::new();
@@ -87,6 +82,8 @@ impl AssetBuilder for FontBuilder {
                 char_map.push(ch as u16);
 
                 let (metrics, bitmap) = font.rasterize(ch, config.size as f32);
+
+                max_baseline = max_baseline.max(metrics.ymin.abs());
 
                 glyph_metadata.push(metrics.width as u8);
                 glyph_metadata.push(metrics.height as u8);
@@ -97,22 +94,12 @@ impl AssetBuilder for FontBuilder {
                 glyph_metadata.extend_from_slice(&offset.to_le_bytes());
 
                 let mut packed_bytes = Vec::new();
-                let mut current_byte = 0u8;
-                let mut pixel_count = 0;
 
-                for alpha in bitmap {
-                    let level = (alpha >> 4) & 0x0F;
-                    current_byte |= level << (4 - (pixel_count % 2) * 4);
-                    pixel_count += 1;
+                for chunk in bitmap.chunks(2) {
+                    let high_nibble = (chunk[0] >> 4) & 0x0F;
+                    let low_nibble = chunk.get(1).map_or(0, |&b| (b >> 4) & 0x0F);
 
-                    if pixel_count % 2 == 0 {
-                        packed_bytes.push(current_byte);
-                        current_byte = 0;
-                    }
-                }
-
-                if pixel_count % 2 != 0 {
-                    packed_bytes.push(current_byte);
+                    packed_bytes.push((high_nibble << 4) | low_nibble);
                 }
 
                 bitmap_data.extend(packed_bytes);
