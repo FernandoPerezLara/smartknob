@@ -4,7 +4,7 @@ use embedded_graphics::{
 };
 use log::debug;
 
-use super::{Color, Display, Graphic};
+use super::{Color, Display, Graphic, GraphicsError};
 
 pub struct FilledCircle {
     pub x: u16,
@@ -14,7 +14,7 @@ pub struct FilledCircle {
 }
 
 impl Graphic for FilledCircle {
-    fn draw(&self, display: &mut Display) {
+    fn draw(&self, display: &mut Display) -> Result<(), GraphicsError> {
         debug!(
             "Drawing filled circle at ({}, {}) with radius {} and color {:?}",
             self.x, self.y, self.diameter, self.color
@@ -26,6 +26,8 @@ impl Graphic for FilledCircle {
         let circle = EgCircle::with_center(center, self.diameter as u32)
             .into_styled(PrimitiveStyle::with_fill(color));
 
-        let _ = circle.draw(display);
+        circle.draw(display)?;
+
+        Ok(())
     }
 }

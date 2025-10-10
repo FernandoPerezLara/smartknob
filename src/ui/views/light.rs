@@ -1,7 +1,7 @@
 use alloc::string::{String, ToString};
 
 use super::{Display, View};
-use crate::peripherals::display::graphics::{Color, Text};
+use crate::peripherals::display::graphics::{Color, GraphicsError, Text};
 
 pub struct LightView {
     name: String,
@@ -14,7 +14,7 @@ impl View for LightView {
         }
     }
 
-    fn render(&self, display: &mut Display) {
+    fn render(&self, display: &mut Display) -> Result<(), GraphicsError> {
         let text = Text {
             content: self.name.clone(),
             x: 120,
@@ -22,6 +22,8 @@ impl View for LightView {
             color: Color::WHITE,
         };
 
-        display.draw(&text);
+        display.draw(&text)?;
+
+        Ok(())
     }
 }

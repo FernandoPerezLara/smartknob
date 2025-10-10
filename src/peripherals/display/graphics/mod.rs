@@ -1,4 +1,5 @@
 mod color;
+pub mod error;
 mod primitives;
 mod text;
 
@@ -7,7 +8,7 @@ use embedded_graphics::{
     prelude::{Dimensions, DrawTarget, IntoStorage, OriginDimensions, Pixel, Size},
 };
 
-pub use self::{color::Color, primitives::FilledCircle, text::Text};
+pub use self::{color::Color, error::GraphicsError, primitives::FilledCircle, text::Text};
 use crate::peripherals::display::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Display, error::DisplayError};
 
 impl OriginDimensions for Display {
@@ -40,14 +41,14 @@ impl DrawTarget for Display {
 }
 
 pub trait Graphic {
-    fn draw(&self, display: &mut Display);
+    fn draw(&self, display: &mut Display) -> Result<(), GraphicsError>;
 }
 
 impl Display {
-    pub fn draw<T>(&mut self, shape: &T)
+    pub fn draw<T>(&mut self, shape: &T) -> Result<(), GraphicsError>
     where
         T: Graphic,
     {
-        shape.draw(self);
+        shape.draw(self)
     }
 }

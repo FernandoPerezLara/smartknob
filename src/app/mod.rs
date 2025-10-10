@@ -45,7 +45,7 @@ impl App {
         }
 
         self.display.clear(Color::BLACK);
-        self.view.select(0, &mut self.display);
+        self.view.select(0, &mut self.display)?;
         self.display.render().await?;
 
         info!("Starting main loop");
