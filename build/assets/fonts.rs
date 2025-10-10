@@ -89,9 +89,7 @@ impl AssetBuilder for FontBuilder {
                 glyph_metadata.push(metrics.height as u8);
                 glyph_metadata.push(metrics.xmin as i8 as u8);
                 glyph_metadata.push(metrics.ymin as i8 as u8);
-
-                let offset = bitmap_data.len() as u16;
-                glyph_metadata.extend_from_slice(&offset.to_le_bytes());
+                glyph_metadata.extend_from_slice(&(bitmap_data.len() as u16).to_le_bytes());
 
                 let mut packed_bytes = Vec::new();
 
