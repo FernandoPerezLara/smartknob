@@ -10,8 +10,9 @@ RUN rustup toolchain install nightly
 RUN rustup component add rustfmt clippy --toolchain nightly
 RUN rustup target add riscv32imac-unknown-none-elf --toolchain nightly
 
-# Install Just
+# Install Just and ldproxy
 RUN cargo install just
+RUN cargo install ldproxy
 
 # Set working directory
 WORKDIR /app
