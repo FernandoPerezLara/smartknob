@@ -184,7 +184,7 @@ impl Graphic for Text {
 
             font.render_glyph(&glyph, cursor_x, cursor_y, color, display);
 
-            cursor_x += glyph.width.max(1) as i32;
+            cursor_x += (glyph.width as i32) + (glyph.xmin as i32);
         }
 
         Ok(())
