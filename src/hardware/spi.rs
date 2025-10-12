@@ -40,12 +40,6 @@ impl SpiInterface {
         MOSI: OutputPin + 'static,
         MISO: InputPin + 'static,
     {
-        if !(0..=80).contains(&frequency) {
-            return Err(SpiError::invalid_parameters(
-                "Frequency must be between 0Mhz and 80Mhz",
-            ));
-        }
-
         debug!("Initializing SPI interface");
 
         let spi_config = Config::default()
