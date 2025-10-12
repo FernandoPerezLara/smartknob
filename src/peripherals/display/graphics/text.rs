@@ -8,13 +8,8 @@ use crate::include_generated;
 
 const FONT_BITMAP: &[u8] = include_generated!(bytes: "fonts/primary.bin");
 
-struct FontHeader {
-    char_count: u32,
-    baseline: u32,
-}
-
 struct BinaryFont<'a> {
-    header: FontHeader,
+    char_count: u32,
     char_map: &'a [u8],
     glyph_metadata: &'a [u8],
     bitmap_data: &'a [u8],
@@ -28,9 +23,29 @@ struct GlyphMetadata {
     bitmap_offset: u16,
 }
 
+fn blend_rgb565(foreground: u16, background: u16, alpha: u8) -> u16 {
+    let background_color = (
+        (background >> 11) & 0x1F,
+        (background >> 5) & 0x3F,
+        background & 0x1F,
+    );
+    let foreground_color = (
+        (foreground >> 11) & 0x1F,
+        (foreground >> 5) & 0x3F,
+        foreground & 0x1F,
+    );
+
+    let alpha_u16 = alpha as u16;
+    let inv_alpha = 15 - alpha_u16;
+
+    (((foreground_color.0 * alpha_u16 + background_color.0 * inv_alpha) / 15) & 0x1F) << 11
+        | (((foreground_color.1 * alpha_u16 + background_color.1 * inv_alpha) / 15) & 0x3F) << 5
+        | (((foreground_color.2 * alpha_u16 + background_color.2 * inv_alpha) / 15) & 0x1F)
+}
+
 impl<'a> BinaryFont<'a> {
     fn new(data: &'a [u8]) -> Result<Self, GraphicsError> {
-        if data.len() < 8 {
+        if data.len() < 4 {
             return Err(GraphicsError::InvalidFontData(
                 "Font data too short for header",
             ));
@@ -41,13 +56,8 @@ impl<'a> BinaryFont<'a> {
                 .try_into()
                 .map_err(|_| GraphicsError::InvalidFontData("Invalid char_count bytes"))?,
         );
-        let baseline = u32::from_le_bytes(
-            data[4..8]
-                .try_into()
-                .map_err(|_| GraphicsError::InvalidFontData("Invalid baseline bytes"))?,
-        );
 
-        let char_map_start = 8;
+        let char_map_start = 4;
         let char_map_size = (char_count as usize) * 2;
         let char_map_end = char_map_start + char_map_size;
 
@@ -67,19 +77,11 @@ impl<'a> BinaryFont<'a> {
             ));
         }
 
-        let header = FontHeader {
-            char_count,
-            baseline,
-        };
-        let char_map = &data[char_map_start..char_map_end];
-        let glyph_metadata = &data[glyph_metadata_start..glyph_metadata_end];
-        let bitmap_data = &data[glyph_metadata_end..];
-
         Ok(Self {
-            header,
-            char_map,
-            glyph_metadata,
-            bitmap_data,
+            char_count,
+            char_map: &data[char_map_start..char_map_end],
+            glyph_metadata: &data[glyph_metadata_start..glyph_metadata_end],
+            bitmap_data: &data[glyph_metadata_end..],
         })
     }
 
@@ -87,7 +89,7 @@ impl<'a> BinaryFont<'a> {
         let target_char = ch as u16;
 
         let mut low = 0;
-        let mut high = self.header.char_count as usize;
+        let mut high = self.char_count as usize;
 
         while low < high {
             let mid = low + (high - low) / 2;
@@ -132,7 +134,7 @@ impl<'a> BinaryFont<'a> {
 
                 let pixel_index = (py as usize) * (glyph.width as usize) + (px as usize);
                 let byte_index = glyph.bitmap_offset as usize + (pixel_index / 2);
-                let is_high_nibble = (pixel_index % 2) == 0;
+                let is_high_nibble = (pixel_index & 1) == 0;
 
                 let byte = self.bitmap_data[byte_index];
                 let alpha = if is_high_nibble {
@@ -142,27 +144,15 @@ impl<'a> BinaryFont<'a> {
                 };
 
                 if alpha > 0 {
-                    if alpha >= 15 {
-                        display.set_pixel(pixel_x as u16, pixel_y as u16, color);
+                    let pixel_color = if alpha >= 15 {
+                        color
                     } else {
-                        let background_color = {
-                            let color = display.get_pixel(pixel_x as u16, pixel_y as u16);
+                        let bg_color = display.get_pixel(pixel_x as u16, pixel_y as u16);
 
-                            ((color >> 11) & 0x1F, (color >> 5) & 0x3F, color & 0x1F)
-                        };
-                        let foreground_color =
-                            ((color >> 11) & 0x1F, (color >> 5) & 0x3F, color & 0x1F);
+                        blend_rgb565(color, bg_color, alpha)
+                    };
 
-                        let alpha_u16 = alpha as u16;
-                        let inv_alpha = 15 - alpha_u16;
-
-                        let blended_color =
-                            (((foreground_color.0 * alpha_u16 + background_color.0 * inv_alpha) / 15) & 0x1F) << 11 |
-                            (((foreground_color.1 * alpha_u16 + background_color.1 * inv_alpha) / 15) & 0x3F) << 5 |
-                            (((foreground_color.2 * alpha_u16 + background_color.2 * inv_alpha) / 15) & 0x1F);
-
-                        display.set_pixel(pixel_x as u16, pixel_y as u16, blended_color);
-                    }
+                    display.set_pixel(pixel_x as u16, pixel_y as u16, pixel_color);
                 }
             }
         }

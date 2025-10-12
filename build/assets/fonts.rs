@@ -59,12 +59,12 @@ impl AssetBuilder for FontBuilder {
 
             // Binary font file format:
             //
-            // | Section        | Size                | Description                          |
-            // |----------------|---------------------|--------------------------------------|
-            // | Header         | 8 bytes             | char_count (u32), max_baseline (u32) |
-            // | Char Map       | char_count × 2      | Sorted u16 char codes (for lookup)   |
-            // | Glyph Metadata | char_count × 6      | width, height, xmin, ymin, offset    |
-            // | Bitmap Data    | Variable            | 4-bit antialiased pixels (packed)    |
+            // | Section        | Size            | Description                          |
+            // |----------------|-----------------|--------------------------------------|
+            // | char_count     | 4 bytes         | Number of characters (u32)           |
+            // | Char Map       | char_count × 2  | Sorted u16 char codes (for lookup)   |
+            // | Glyph Metadata | char_count × 6  | width, height, xmin, ymin, offset    |
+            // | Bitmap Data    | Variable        | 4-bit antialiased pixels (packed)    |
             //
             // All multi-byte values are little-endian.
             // Bitmap: 2 pixels/byte, first pixel in high nibble.
@@ -73,7 +73,6 @@ impl AssetBuilder for FontBuilder {
             chars.sort_unstable();
             chars.dedup();
 
-            let mut max_baseline: i32 = 0;
             let mut char_map: Vec<u16> = Vec::new();
             let mut glyph_metadata: Vec<u8> = Vec::new();
             let mut bitmap_data: Vec<u8> = Vec::new();
@@ -82,8 +81,6 @@ impl AssetBuilder for FontBuilder {
                 char_map.push(ch as u16);
 
                 let (metrics, bitmap) = font.rasterize(ch, config.size as f32);
-
-                max_baseline = max_baseline.max(metrics.ymin.abs());
 
                 glyph_metadata.push(metrics.width as u8);
                 glyph_metadata.push(metrics.height as u8);
@@ -106,9 +103,6 @@ impl AssetBuilder for FontBuilder {
             output_file
                 .write_all(&(chars.len() as u32).to_le_bytes())
                 .expect("Failed to write character count");
-            output_file
-                .write_all(&max_baseline.to_le_bytes())
-                .expect("Failed to write max baseline");
 
             let char_map_bytes: Vec<u8> = char_map.iter().flat_map(|&c| c.to_le_bytes()).collect();
             output_file
