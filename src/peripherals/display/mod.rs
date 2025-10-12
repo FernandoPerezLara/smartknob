@@ -170,6 +170,12 @@ impl Display {
         self.buffer[index + 1] = (color & 0xFF) as u8;
     }
 
+    pub fn get_pixel(&self, x: u16, y: u16) -> u16 {
+        let index = ((y as usize) * (DISPLAY_WIDTH as usize) + (x as usize)) * 2;
+
+        ((self.buffer[index] as u16) << 8) | (self.buffer[index + 1] as u16)
+    }
+
     pub fn clear(&mut self, color: Color) {
         debug!("Setting background color: {:?}", color);
 

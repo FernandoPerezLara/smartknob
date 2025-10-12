@@ -30,7 +30,7 @@ impl App {
         debug!("Display interface created successfully");
 
         let mut view = ViewManager::new();
-        view.add(Box::new(LightView::new("Bedroom")));
+        view.add(Box::new(LightView::new("Abcdefg")));
 
         Ok(Self { display, view })
     }
@@ -46,6 +46,7 @@ impl App {
 
         self.display.clear(Color::BLACK);
         self.view.select(0, &mut self.display)?;
+        self.display.set_pixel(120, 120, 0xF800);
         self.display.render().await?;
 
         info!("Starting main loop");
