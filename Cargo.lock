@@ -1161,6 +1161,7 @@ name = "smartknob"
 version = "0.1.0"
 dependencies = [
  "embassy-executor",
+ "embassy-sync 0.7.2",
  "embassy-time",
  "embedded-graphics",
  "embedded-hal-async",
@@ -1174,6 +1175,7 @@ dependencies = [
  "libm",
  "log",
  "serde",
+ "static_cell",
  "toml",
 ]
 

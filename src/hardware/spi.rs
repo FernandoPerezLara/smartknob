@@ -1,9 +1,11 @@
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use embedded_hal_async::spi::SpiBus;
+// use embassy_sync::{blocking_mutex::{raw::CriticalSectionRawMutex, Mutex}, mutex::Mutex};
 use esp_hal::{
     Async,
     dma::{AnyGdmaChannel, DmaChannelConvert, DmaChannelFor, DmaRxBuf, DmaTxBuf},
     dma_buffers,
-    gpio::{InputPin, Output, OutputPin},
+    gpio::{InputPin, Level, Output, OutputConfig, OutputPin},
     spi::{
         Mode,
         master::{Config, Instance, Spi, SpiDmaBus},
@@ -11,18 +13,20 @@ use esp_hal::{
     time::Rate,
 };
 use log::debug;
+use static_cell::StaticCell;
 
 use super::error::SpiError;
 
 const DMA_BUFFER_SIZE: usize = 4096;
 
-pub struct SpiInterface {
-    spi: SpiDmaBus<'static, Async>,
-    cs: Output<'static>,
+static SPI_BUS: StaticCell<Mutex<CriticalSectionRawMutex, SpiDmaBus<'static, Async>>> =
+    StaticCell::new();
+
+pub struct SharedSpiBus {
+    inner: &'static Mutex<CriticalSectionRawMutex, SpiDmaBus<'static, Async>>,
 }
 
-impl SpiInterface {
-    #[allow(clippy::too_many_arguments)]
+impl SharedSpiBus {
     pub fn new<SPI, DMA, SCLK, MOSI, MISO>(
         frequency: u32,
         mode: Mode,
@@ -31,7 +35,6 @@ impl SpiInterface {
         sclk: SCLK,
         mosi: MOSI,
         miso: MISO,
-        cs: Output<'static>,
     ) -> Result<Self, SpiError>
     where
         SPI: Instance + 'static,
@@ -40,7 +43,7 @@ impl SpiInterface {
         MOSI: OutputPin + 'static,
         MISO: InputPin + 'static,
     {
-        debug!("Initializing SPI interface");
+        debug!("Initializing shared SPI bus");
 
         let spi_config = Config::default()
             .with_frequency(Rate::from_mhz(frequency))
@@ -59,9 +62,39 @@ impl SpiInterface {
             .with_buffers(dma_rx_buf, dma_tx_buf)
             .into_async();
 
-        debug!("SPI interface initialized successfully");
+        debug!("Shared SPI interface initialized successfully");
 
-        Ok(Self { spi, cs })
+        let inner = SPI_BUS.init(Mutex::new(spi));
+
+        Ok(Self { inner })
+    }
+
+    pub fn as_ref(&self) -> &'static Mutex<CriticalSectionRawMutex, SpiDmaBus<'static, Async>> {
+        self.inner
+    }
+}
+
+pub struct SpiDevice {
+    bus: &'static Mutex<CriticalSectionRawMutex, SpiDmaBus<'static, Async>>,
+    cs: Output<'static>,
+    frequency: u32,
+}
+
+impl SpiDevice {
+    pub fn new<CS>(bus: &SharedSpiBus, cs_pin: CS, frequency: u32) -> Self
+    where
+        CS: OutputPin + 'static,
+    {
+        debug!(
+            "Creating SPI device with CS pin at frequency {}MHz",
+            frequency
+        );
+
+        Self {
+            bus: bus.as_ref(),
+            cs: Output::new(cs_pin, Level::High, OutputConfig::default()),
+            frequency,
+        }
     }
 
     pub async fn write(&mut self, data: &[u8]) -> Result<(), SpiError> {
@@ -71,10 +104,10 @@ impl SpiInterface {
             ));
         }
 
+        let mut bus = self.bus.lock().await;
+
         self.cs.set_low();
-
-        let result = SpiBus::write(&mut self.spi, data).await;
-
+        let result = SpiBus::write(&mut *bus, data).await;
         self.cs.set_high();
 
         result.map_err(|_| SpiError::write_failed("Failed to write data to SPI bus"))
@@ -87,10 +120,10 @@ impl SpiInterface {
             ));
         }
 
+        let mut bus = self.bus.lock().await;
+
         self.cs.set_low();
-
-        let result = SpiBus::read(&mut self.spi, data).await;
-
+        let result = SpiBus::read(&mut *bus, data).await;
         self.cs.set_high();
 
         result.map_err(|_| SpiError::read_failed("Failed to read data from SPI bus"))
@@ -109,12 +142,26 @@ impl SpiInterface {
             ));
         }
 
+        let mut bus = self.bus.lock().await;
+
         self.cs.set_low();
-
-        let result = SpiBus::transfer(&mut self.spi, read, write).await;
-
+        let result = SpiBus::transfer(&mut *bus, read, write).await;
         self.cs.set_high();
 
-        result.map_err(|_| SpiError::read_failed("Failed to read data from SPI bus"))
+        result.map_err(|_| SpiError::transfer_failed("Failed to transfer data on SPI bus"))
+    }
+
+    pub async fn transfer_in_place(&mut self, data: &mut [u8]) -> Result<(), SpiError> {
+        if data.is_empty() {
+            return Err(SpiError::invalid_parameters("Data buffer cannot be empty"));
+        }
+
+        let mut bus = self.bus.lock().await;
+
+        self.cs.set_low();
+        let result = SpiBus::transfer_in_place(&mut *bus, data).await;
+        self.cs.set_high();
+
+        result.map_err(|_| SpiError::transfer_failed("Failed to transfer data in place on SPI bus"))
     }
 }

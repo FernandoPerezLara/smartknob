@@ -9,7 +9,10 @@ use esp_hal::{
 };
 use log::{debug, info};
 
-use self::{error::HardwareError, spi::SpiInterface};
+use self::{
+    error::HardwareError,
+    spi::{SharedSpiBus, SpiDevice},
+};
 
 pub struct Pins {
     pub display_dc: Output<'static>,
@@ -17,7 +20,9 @@ pub struct Pins {
 }
 
 pub struct Hardware {
-    pub display_spi: SpiInterface,
+    pub spi_bus: SharedSpiBus,
+    pub display_spi: SpiDevice,
+    pub encoder_spi: SpiDevice,
     pub pins: Pins,
 }
 
@@ -30,7 +35,8 @@ impl Hardware {
         let timer = SystemTimer::new(peripherals.SYSTIMER);
         esp_hal_embassy::init(timer.alarm0);
 
-        let display_spi = SpiInterface::new(
+        debug!("Initializing shared SPI bus");
+        let spi_bus = SharedSpiBus::new(
             80,
             Mode::_0,
             peripherals.SPI2,
@@ -38,8 +44,11 @@ impl Hardware {
             peripherals.GPIO19,
             peripherals.GPIO18,
             peripherals.GPIO20,
-            Output::new(peripherals.GPIO0, Level::High, OutputConfig::default()),
         )?;
+
+        debug!("Creating SPI devices");
+        let display_spi = SpiDevice::new(&spi_bus, peripherals.GPIO0, 80);
+        let encoder_spi = SpiDevice::new(&spi_bus, peripherals.GPIO3, 1);
 
         let pins = Pins {
             display_dc: Output::new(peripherals.GPIO1, Level::High, OutputConfig::default()),
@@ -48,14 +57,17 @@ impl Hardware {
 
         info!("Components initialized successfully");
 
-        Ok(Self { display_spi, pins })
+        Ok(Self {
+            spi_bus,
+            display_spi,
+            encoder_spi,
+            pins,
+        })
     }
 
     fn init_peripherals() -> Result<Peripherals, HardwareError> {
         debug!("Initializing ESP32 peripherals");
-
         let peripherals = esp_hal::init(esp_hal::Config::default());
-
         debug!("ESP32 peripherals initialized successfully");
         Ok(peripherals)
     }
