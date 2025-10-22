@@ -28,8 +28,6 @@ pub struct SharedSpiBus {
 
 impl SharedSpiBus {
     pub fn new<SPI, DMA, SCLK, MOSI, MISO>(
-        frequency: u32,
-        mode: Mode,
         spi_instance: SPI,
         dma_channel: DMA,
         sclk: SCLK,
@@ -45,9 +43,7 @@ impl SharedSpiBus {
     {
         debug!("Initializing shared SPI bus");
 
-        let spi_config = Config::default()
-            .with_frequency(Rate::from_mhz(frequency))
-            .with_mode(mode);
+        let spi_config = Config::default();
 
         let (rx_buffer, rx_descriptors, tx_buffer, tx_descriptors) = dma_buffers!(DMA_BUFFER_SIZE);
         let dma_rx_buf = DmaRxBuf::new(rx_descriptors, rx_buffer)?;
@@ -77,18 +73,22 @@ impl SharedSpiBus {
 pub struct SpiDevice {
     bus: &'static Mutex<CriticalSectionRawMutex, SpiDmaBus<'static, Async>>,
     cs: Output<'static>,
+    frequency: u32,
+    mode: Mode,
 }
 
 impl SpiDevice {
-    pub fn new<CS>(bus: &SharedSpiBus, cs_pin: CS) -> Self
+    pub fn new<CS>(bus: &SharedSpiBus, cs_pin: CS, frequency: u32, mode: Mode) -> Self
     where
         CS: OutputPin + 'static,
     {
-        debug!("Creating SPI device with dedicated chip select pin");
+        debug!("Creating SPI device with CS pin at {}MHz", frequency);
 
         Self {
             bus: bus.bus(),
             cs: Output::new(cs_pin, Level::High, OutputConfig::default()),
+            frequency,
+            mode,
         }
     }
 
@@ -100,6 +100,11 @@ impl SpiDevice {
         }
 
         let mut bus = self.bus.lock().await;
+
+        let config = Config::default()
+            .with_frequency(Rate::from_mhz(self.frequency))
+            .with_mode(self.mode);
+        bus.apply_config(&config)?;
 
         self.cs.set_low();
         let result = SpiBus::write(&mut *bus, data).await;
@@ -116,6 +121,11 @@ impl SpiDevice {
         }
 
         let mut bus = self.bus.lock().await;
+
+        let config = Config::default()
+            .with_frequency(Rate::from_mhz(self.frequency))
+            .with_mode(self.mode);
+        bus.apply_config(&config)?;
 
         self.cs.set_low();
         let result = SpiBus::read(&mut *bus, data).await;
@@ -139,6 +149,11 @@ impl SpiDevice {
 
         let mut bus = self.bus.lock().await;
 
+        let config = Config::default()
+            .with_frequency(Rate::from_mhz(self.frequency))
+            .with_mode(self.mode);
+        bus.apply_config(&config)?;
+
         self.cs.set_low();
         let result = SpiBus::transfer(&mut *bus, read, write).await;
         self.cs.set_high();
@@ -152,6 +167,11 @@ impl SpiDevice {
         }
 
         let mut bus = self.bus.lock().await;
+
+        let config = Config::default()
+            .with_frequency(Rate::from_mhz(self.frequency))
+            .with_mode(self.mode);
+        bus.apply_config(&config)?;
 
         self.cs.set_low();
         let result = SpiBus::transfer_in_place(&mut *bus, data).await;

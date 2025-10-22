@@ -37,8 +37,6 @@ impl Hardware {
 
         debug!("Initializing shared SPI bus");
         let spi_bus = SharedSpiBus::new(
-            80,
-            Mode::_0,
             peripherals.SPI2,
             peripherals.DMA_CH0,
             peripherals.GPIO19,
@@ -47,8 +45,8 @@ impl Hardware {
         )?;
 
         debug!("Creating SPI devices");
-        let display_spi = SpiDevice::new(&spi_bus, peripherals.GPIO1);
-        let encoder_spi = SpiDevice::new(&spi_bus, peripherals.GPIO21);
+        let display_spi = SpiDevice::new(&spi_bus, peripherals.GPIO1, 80, Mode::_0);
+        let encoder_spi = SpiDevice::new(&spi_bus, peripherals.GPIO21, 1, Mode::_0);
 
         let pins = Pins {
             display_dc: Output::new(peripherals.GPIO0, Level::High, OutputConfig::default()),
