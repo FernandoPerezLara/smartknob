@@ -69,7 +69,7 @@ impl SharedSpiBus {
         Ok(Self { inner })
     }
 
-    pub fn as_ref(&self) -> &'static Mutex<CriticalSectionRawMutex, SpiDmaBus<'static, Async>> {
+    pub fn bus(&self) -> &'static Mutex<CriticalSectionRawMutex, SpiDmaBus<'static, Async>> {
         self.inner
     }
 }
@@ -77,23 +77,18 @@ impl SharedSpiBus {
 pub struct SpiDevice {
     bus: &'static Mutex<CriticalSectionRawMutex, SpiDmaBus<'static, Async>>,
     cs: Output<'static>,
-    frequency: u32,
 }
 
 impl SpiDevice {
-    pub fn new<CS>(bus: &SharedSpiBus, cs_pin: CS, frequency: u32) -> Self
+    pub fn new<CS>(bus: &SharedSpiBus, cs_pin: CS) -> Self
     where
         CS: OutputPin + 'static,
     {
-        debug!(
-            "Creating SPI device with CS pin at frequency {}MHz",
-            frequency
-        );
+        debug!("Creating SPI device with dedicated chip select pin");
 
         Self {
-            bus: bus.as_ref(),
+            bus: bus.bus(),
             cs: Output::new(cs_pin, Level::High, OutputConfig::default()),
-            frequency,
         }
     }
 

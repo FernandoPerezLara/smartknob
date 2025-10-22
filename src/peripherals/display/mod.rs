@@ -10,7 +10,7 @@ use esp_hal::gpio::Output;
 use log::{debug, info};
 
 use self::{config::CONFIG, error::DisplayError, graphics::Color};
-use crate::hardware::spi::SpiInterface;
+use crate::hardware::spi::SpiDevice;
 
 const DISPLAY_WIDTH: u16 = 240;
 const DISPLAY_HEIGHT: u16 = 240;
@@ -23,14 +23,14 @@ enum Operation {
 }
 
 pub struct Display {
-    spi: SpiInterface,
+    spi: SpiDevice,
     dc: Output<'static>,
     rst: Output<'static>,
     buffer: Box<[u8; BUFFER_SIZE]>,
 }
 
 impl Display {
-    pub fn new(spi: SpiInterface, dc: Output<'static>, rst: Output<'static>) -> Self {
+    pub fn new(spi: SpiDevice, dc: Output<'static>, rst: Output<'static>) -> Self {
         Self {
             spi,
             dc,

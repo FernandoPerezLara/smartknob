@@ -47,8 +47,8 @@ impl Hardware {
         )?;
 
         debug!("Creating SPI devices");
-        let display_spi = SpiDevice::new(&spi_bus, peripherals.GPIO0, 80);
-        let encoder_spi = SpiDevice::new(&spi_bus, peripherals.GPIO3, 1);
+        let display_spi = SpiDevice::new(&spi_bus, peripherals.GPIO0);
+        let encoder_spi = SpiDevice::new(&spi_bus, peripherals.GPIO3);
 
         let pins = Pins {
             display_dc: Output::new(peripherals.GPIO1, Level::High, OutputConfig::default()),
