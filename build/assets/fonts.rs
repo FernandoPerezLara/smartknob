@@ -59,12 +59,12 @@ impl AssetBuilder for FontBuilder {
 
             // Binary font file format:
             //
-            // | Section        | Size            | Description                          |
-            // |----------------|-----------------|--------------------------------------|
-            // | char_count     | 4 bytes         | Number of characters (u32)           |
-            // | Char Map       | char_count × 2  | Sorted u16 char codes (for lookup)   |
-            // | Glyph Metadata | char_count × 6  | width, height, xmin, ymin, offset    |
-            // | Bitmap Data    | Variable        | 4-bit antialiased pixels (packed)    |
+            // | Section        | Size            | Description                                      |
+            // |----------------|-----------------|--------------------------------------------------|
+            // | char_count     | 4 bytes         | Number of characters (u32)                       |
+            // | Char Map       | char_count × 2  | Sorted u16 char codes (for lookup)               |
+            // | Glyph Metadata | char_count × 7  | width, height, xmin, ymin, advance_width, offset |
+            // | Bitmap Data    | Variable        | 4-bit antialiased pixels (packed)                |
             //
             // All multi-byte values are little-endian.
             // Bitmap: 2 pixels/byte, first pixel in high nibble.
@@ -86,6 +86,7 @@ impl AssetBuilder for FontBuilder {
                 glyph_metadata.push(metrics.height as u8);
                 glyph_metadata.push(metrics.xmin as i8 as u8);
                 glyph_metadata.push(metrics.ymin as i8 as u8);
+                glyph_metadata.push(metrics.advance_width as u8);
                 glyph_metadata.extend_from_slice(&(bitmap_data.len() as u16).to_le_bytes());
 
                 let mut packed_bytes = Vec::new();

@@ -20,6 +20,7 @@ struct GlyphMetadata {
     height: u8,
     xmin: i8,
     ymin: i8,
+    advance_width: u8,
     bitmap_offset: u16,
 }
 
@@ -68,7 +69,7 @@ impl<'a> BinaryFont<'a> {
         }
 
         let glyph_metadata_start = char_map_end;
-        let glyph_metadata_size = (char_count as usize) * 6;
+        let glyph_metadata_size = (char_count as usize) * 7;
         let glyph_metadata_end = glyph_metadata_start + glyph_metadata_size;
 
         if data.len() < glyph_metadata_end {
@@ -97,15 +98,16 @@ impl<'a> BinaryFont<'a> {
 
             match mid_char.cmp(&target_char) {
                 Ordering::Equal => {
-                    let offset = mid * 6;
-                    let metadata = &self.glyph_metadata[offset..offset + 6];
+                    let offset = mid * 7;
+                    let metadata = &self.glyph_metadata[offset..offset + 7];
 
                     return Ok(GlyphMetadata {
                         width: metadata[0],
                         height: metadata[1],
                         xmin: metadata[2] as i8,
                         ymin: metadata[3] as i8,
-                        bitmap_offset: u16::from_le_bytes([metadata[4], metadata[5]]),
+                        advance_width: metadata[4],
+                        bitmap_offset: u16::from_le_bytes([metadata[5], metadata[6]]),
                     });
                 },
                 Ordering::Less => low = mid + 1,
@@ -184,7 +186,7 @@ impl Graphic for Text {
 
             font.render_glyph(&glyph, cursor_x, cursor_y, color, display);
 
-            cursor_x += (glyph.width as i32) + (glyph.xmin as i32);
+            cursor_x += glyph.advance_width as i32;
         }
 
         Ok(())

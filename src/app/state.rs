@@ -1,4 +1,4 @@
-#[derive(Default, Clone, Copy)]
+#[derive(Default)]
 pub struct AppState {
     pub angle: f32,
 }
