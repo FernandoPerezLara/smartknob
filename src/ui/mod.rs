@@ -4,7 +4,10 @@ use alloc::{boxed::Box, vec::Vec};
 
 pub use views::{LightView, View};
 
-use crate::peripherals::display::{Display, graphics::GraphicsError};
+use crate::{
+    app::AppState,
+    peripherals::display::{Display, graphics::GraphicsError},
+};
 
 #[derive(Default)]
 pub struct ViewManager {
@@ -20,9 +23,14 @@ impl ViewManager {
         self.views.push(view);
     }
 
-    pub fn select(&self, index: usize, display: &mut Display) -> Result<(), GraphicsError> {
+    pub fn select(
+        &self,
+        index: usize,
+        state: &AppState,
+        display: &mut Display,
+    ) -> Result<(), GraphicsError> {
         if let Some(view) = self.views.get(index) {
-            view.render(display)?;
+            view.render(state, display)?;
         }
 
         Ok(())

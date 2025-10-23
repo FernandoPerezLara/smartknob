@@ -1,24 +1,27 @@
-use alloc::string::{String, ToString};
+use alloc::{
+    format,
+    string::{String, ToString},
+};
 
-use super::{Display, View};
+use super::{AppState, Display, View};
 use crate::peripherals::display::graphics::{Color, GraphicsError, Text};
 
 pub struct LightView {
-    name: String,
+    _name: String,
 }
 
 impl View for LightView {
     fn new(name: &str) -> Self {
         Self {
-            name: name.to_string(),
+            _name: name.to_string(),
         }
     }
 
-    fn render(&self, display: &mut Display) -> Result<(), GraphicsError> {
+    fn render(&self, state: &AppState, display: &mut Display) -> Result<(), GraphicsError> {
         let text = Text {
-            content: self.name.clone(),
+            content: format!("Angle: {:.1}", state.angle),
             x: 120,
-            y: 120,
+            y: 140,
             color: Color::WHITE,
         };
 

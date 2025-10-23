@@ -1,8 +1,11 @@
+mod state;
+
 use alloc::boxed::Box;
 
 use embassy_time::{Duration, Timer};
 use log::{debug, error, info};
 
+pub use self::state::AppState;
 use crate::{
     error::SmartknobError,
     hardware::Hardware,
@@ -17,6 +20,7 @@ pub struct App {
     display: Display,
     encoder: Encoder,
     view: ViewManager,
+    state: AppState,
 }
 
 impl App {
@@ -39,10 +43,13 @@ impl App {
         let mut view = ViewManager::new();
         view.add(Box::new(LightView::new("Light 1")));
 
+        let state = AppState::new();
+
         Ok(Self {
             display,
             encoder,
             view,
+            state,
         })
     }
 
@@ -56,18 +63,18 @@ impl App {
         }
 
         self.display.clear(Color::BLACK);
-        self.view.select(0, &mut self.display)?;
-        self.display.set_pixel(120, 120, 0xF800);
+        self.view.select(0, &self.state, &mut self.display)?;
         self.display.render().await?;
 
         info!("Starting main loop");
         loop {
             let position = self.encoder.read().await?;
-            debug!(
-                "Status: {}, Angle: {}",
-                position.status,
-                position.angle as f32 * ANGLE_TO_DEGREES,
-            );
+
+            self.state.angle = position.angle as f32 * ANGLE_TO_DEGREES;
+
+            self.display.clear(Color::BLACK);
+            self.view.select(0, &self.state, &mut self.display)?;
+            self.display.render().await?;
 
             Timer::after(Duration::from_millis(16)).await;
         }
