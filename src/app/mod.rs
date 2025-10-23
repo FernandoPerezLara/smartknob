@@ -6,12 +6,16 @@ use log::{debug, error, info};
 use crate::{
     error::SmartknobError,
     hardware::Hardware,
-    peripherals::display::{Display, graphics::Color},
+    peripherals::{
+        display::{Display, graphics::Color},
+        encoder::{ANGLE_TO_DEGREES, Encoder},
+    },
     ui::{LightView, View, ViewManager},
 };
 
 pub struct App {
     display: Display,
+    encoder: Encoder,
     view: ViewManager,
 }
 
@@ -29,10 +33,17 @@ impl App {
         );
         debug!("Display interface created successfully");
 
+        let encoder = Encoder::new(hardware.encoder_spi);
+        debug!("Encoder interface created successfully");
+
         let mut view = ViewManager::new();
         view.add(Box::new(LightView::new("Abcdefg")));
 
-        Ok(Self { display, view })
+        Ok(Self {
+            display,
+            encoder,
+            view,
+        })
     }
 
     pub async fn run(&mut self) -> Result<(), SmartknobError> {
@@ -51,7 +62,13 @@ impl App {
 
         info!("Starting main loop");
         loop {
-            Timer::after(Duration::from_millis(1000)).await;
+            let position = self.encoder.read().await?;
+            debug!(
+                "Encoder angle: {}",
+                position.angle as f32 * ANGLE_TO_DEGREES
+            );
+
+            Timer::after(Duration::from_millis(16)).await;
         }
     }
 }
