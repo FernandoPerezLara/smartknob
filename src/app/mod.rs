@@ -37,7 +37,7 @@ impl App {
         debug!("Encoder interface created successfully");
 
         let mut view = ViewManager::new();
-        view.add(Box::new(LightView::new("Abcdefg")));
+        view.add(Box::new(LightView::new("Light 1")));
 
         Ok(Self {
             display,
@@ -64,8 +64,9 @@ impl App {
         loop {
             let position = self.encoder.read().await?;
             debug!(
-                "Encoder angle: {}",
-                position.angle as f32 * ANGLE_TO_DEGREES
+                "Status: {}, Angle: {}",
+                position.status,
+                position.angle as f32 * ANGLE_TO_DEGREES,
             );
 
             Timer::after(Duration::from_millis(16)).await;
