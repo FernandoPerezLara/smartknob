@@ -1,0 +1,56 @@
+name: Bug Report
+description: Create a report to help us improve
+title: "Bug Report: [Short description]"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report :heart:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: "Please [search :mag: the issues](https://github.com/FernandoPerezLara/smartknob/issues) to check if this bug has already been reported."
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: input
+    attributes:
+      label: Rust Version
+      description: "What version of Rust are you using? (e.g., 1.90.0)"
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: What is your operating system?
+      multiple: false
+      options:
+        - "Linux"
+        - "macOS"
+        - "Windows"
+  - type: checkboxes
+    attributes:
+      label: Is this issue reproducible using the latest components?
+      description: |
+        Please ensure you are using the latest version of Smartknob and its dependencies. If not, please update and check if the issue persists.
+      options:
+        - label: I confirm the issue is still reproducible with the latest component versions
+  - type: input
+    attributes:
+      label: Relevant log output
+      description: |
+        Please create a [Gist](https://gist.github.com) with your _full_ output log and link it here. Alternatively, you can directly attach your logfile in the "Further Information" field below.
+
+        :warning: _Remember to redact or remove any sensitive information!_
+      placeholder: "https://gist.github.com/..."
+  - type: textarea
+    attributes:
+      label: Further Information
+      description: If needed, please provide additional information about your issue (attachments, links, references, etc.).
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
