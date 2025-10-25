@@ -194,12 +194,19 @@ impl Graphic for Text {
 
         let mut glyphs: Vec<GlyphMetadata> = Vec::new();
         let mut text_width: i32 = 0;
-        let mut max_height: i32 = 0;
+        let mut max_top: i32 = 0;
+        let mut min_bottom: i32 = 0;
 
         for ch in self.content.chars() {
             let glyph = font.find_glyph(ch)?;
             text_width += glyph.advance_width as i32;
-            max_height = max_height.max(glyph.height as i32);
+
+            let top = glyph.height as i32 + glyph.ymin as i32;
+            let bottom = glyph.ymin as i32;
+
+            max_top = max_top.max(top);
+            min_bottom = min_bottom.min(bottom);
+
             glyphs.push(glyph);
         }
 
@@ -210,9 +217,9 @@ impl Graphic for Text {
         };
 
         let cursor_y = match self.vertical_align {
-            VerticalAlignment::Top => self.y as i32,
-            VerticalAlignment::Middle => self.y as i32 + (max_height / 2),
-            VerticalAlignment::Bottom => self.y as i32 + max_height,
+            VerticalAlignment::Top => self.y as i32 - min_bottom,
+            VerticalAlignment::Middle => self.y as i32 + ((max_top - min_bottom) / 2) + min_bottom,
+            VerticalAlignment::Bottom => self.y as i32 + max_top,
         };
 
         for glyph in glyphs.iter() {
