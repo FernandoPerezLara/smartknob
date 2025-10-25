@@ -1,6 +1,6 @@
-name: ":bug: Bug Report"
+name: 🐛 Bug Report
 description: Create a report to help us improve
-title: ":bug: Bug Report: [Short description]"
+title: "🐛 Bug Report: [Short description]"
 labels: ["bug"]
 body:
   - type: markdown
