@@ -42,9 +42,12 @@ body:
       label: Relevant log output
       description: |
         Please create a [Gist](https://gist.github.com) with your _full_ output log and link it here. Alternatively, you can directly attach your logfile in the "Further Information" field below.
-
-        :warning: _Remember to redact or remove any sensitive information!_
       placeholder: "https://gist.github.com/..."
+  - type: markdown
+    attributes:
+      value: |
+        > [!WARNING]
+        > Remember to redact or remove any sensitive information!
   - type: textarea
     attributes:
       label: What happened?
