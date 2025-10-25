@@ -73,6 +73,7 @@ impl App {
             self.state.angle = position.angle as f32 * ANGLE_TO_DEGREES;
 
             self.display.clear(Color::BLACK);
+            self.display.set_pixel(120, 120, 0xF800);
             self.view.select(0, &self.state, &mut self.display)?;
             self.display.render().await?;
 

@@ -4,7 +4,10 @@ use alloc::{
 };
 
 use super::{AppState, Display, View};
-use crate::peripherals::display::graphics::{Color, GraphicsError, Text};
+use crate::peripherals::display::graphics::{
+    Color, GraphicsError,
+    text::{HorizontalAlignment, Text, VerticalAlignment},
+};
 
 pub struct LightView {
     _name: String,
@@ -21,8 +24,10 @@ impl View for LightView {
         let text = Text {
             content: format!("Angle: {:.1}", state.angle),
             x: 120,
-            y: 140,
+            y: 120,
             color: Color::WHITE,
+            horizontal_align: HorizontalAlignment::Center,
+            vertical_align: VerticalAlignment::Middle,
         };
 
         display.draw(&text)?;

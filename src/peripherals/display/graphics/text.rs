@@ -1,4 +1,4 @@
-use alloc::string::String;
+use alloc::{string::String, vec::Vec};
 use core::cmp::Ordering;
 
 use log::debug;
@@ -161,11 +161,25 @@ impl<'a> BinaryFont<'a> {
     }
 }
 
+pub enum HorizontalAlignment {
+    Left,
+    Center,
+    Right,
+}
+
+pub enum VerticalAlignment {
+    Top,
+    Middle,
+    Bottom,
+}
+
 pub struct Text {
     pub content: String,
     pub x: u16,
     pub y: u16,
     pub color: Color,
+    pub horizontal_align: HorizontalAlignment,
+    pub vertical_align: VerticalAlignment,
 }
 
 impl Graphic for Text {
@@ -178,14 +192,31 @@ impl Graphic for Text {
         let font = BinaryFont::new(FONT_BITMAP)?;
         let color = self.color.into();
 
-        let mut cursor_x = self.x as i32;
-        let cursor_y = self.y as i32;
+        let mut glyphs: Vec<GlyphMetadata> = Vec::new();
+        let mut text_width: i32 = 0;
+        let mut max_height: i32 = 0;
 
         for ch in self.content.chars() {
             let glyph = font.find_glyph(ch)?;
+            text_width += glyph.advance_width as i32;
+            max_height = max_height.max(glyph.height as i32);
+            glyphs.push(glyph);
+        }
 
-            font.render_glyph(&glyph, cursor_x, cursor_y, color, display);
+        let mut cursor_x = match self.horizontal_align {
+            HorizontalAlignment::Left => self.x as i32,
+            HorizontalAlignment::Center => self.x as i32 - (text_width / 2),
+            HorizontalAlignment::Right => self.x as i32 - text_width,
+        };
 
+        let cursor_y = match self.vertical_align {
+            VerticalAlignment::Top => self.y as i32,
+            VerticalAlignment::Middle => self.y as i32 + (max_height / 2),
+            VerticalAlignment::Bottom => self.y as i32 + max_height,
+        };
+
+        for glyph in glyphs.iter() {
+            font.render_glyph(glyph, cursor_x, cursor_y, color, display);
             cursor_x += glyph.advance_width as i32;
         }
 

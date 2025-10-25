@@ -1,14 +1,14 @@
 mod color;
 pub mod error;
 mod primitives;
-mod text;
+pub mod text;
 
 use embedded_graphics::{
     pixelcolor::Rgb565,
     prelude::{Dimensions, DrawTarget, IntoStorage, OriginDimensions, Pixel, Size},
 };
 
-pub use self::{color::Color, error::GraphicsError, primitives::FilledCircle, text::Text};
+pub use self::{color::Color, error::GraphicsError, primitives::FilledCircle};
 use crate::peripherals::display::{DISPLAY_HEIGHT, DISPLAY_WIDTH, Display, error::DisplayError};
 
 impl OriginDimensions for Display {
