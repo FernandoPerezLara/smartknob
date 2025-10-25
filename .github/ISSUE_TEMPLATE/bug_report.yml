@@ -17,7 +17,7 @@ body:
     attributes:
       value: |
         > [!TIP]
-        > Please [search :mag: the issues](https://github.com/FernandoPerezLara/smartknob/issues) to check if this bug has already been reported.
+        > Please [:mag: search the issues](https://github.com/FernandoPerezLara/smartknob/issues) to check if this bug has already been reported.
   - type: input
     attributes:
       label: Rust Version
