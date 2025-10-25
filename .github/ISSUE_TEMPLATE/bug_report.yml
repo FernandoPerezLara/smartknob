@@ -10,7 +10,9 @@ body:
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
-      description: "Please [search :mag: the issues](https://github.com/FernandoPerezLara/smartknob/issues) to check if this bug has already been reported."
+      description: |
+        > [!TIP]
+        > Please [search :mag: the issues](https://github.com/FernandoPerezLara/smartknob/issues) to check if this bug has already been reported.
       options:
         - label: I have searched the existing issues
           required: true
