@@ -1,7 +1,5 @@
 .zed/
-.claude/
 
-.git/
 .gitignore
 
 target/

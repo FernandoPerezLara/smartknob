@@ -1,4 +1,4 @@
 .zed/
-.claude/
+!.zed/settings.json
 
 target/

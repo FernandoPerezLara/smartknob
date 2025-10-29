@@ -15,7 +15,8 @@ jobs:
 
       - name: Build Docker image
         run: docker compose build build
+        working-directory: ./firmware
 
       - name: Run build release
-        run: |
-          docker compose run build
+        run: docker compose run build
+        working-directory: ./firmware

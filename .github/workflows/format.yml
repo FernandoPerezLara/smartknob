@@ -15,7 +15,8 @@ jobs:
 
       - name: Build Docker image
         run: docker compose build lint
+        working-directory: ./firmware
 
       - name: Run formatter check
-        run: |
-          docker compose run lint
+        run: docker compose run lint
+        working-directory: ./firmware

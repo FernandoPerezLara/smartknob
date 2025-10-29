@@ -38,25 +38,27 @@ We love pull requests! If you're planning to work on a larger contribution, it's
 To get started with the development of Smartknob, you'll need to have [Rust](https://www.rust-lang.org/tools/install) and `just` installed.
 
 1.  Fork the repository and clone it to your local machine.
-2.  Install the required dependencies: `cargo install espflash`
-3.  Build the project: `just build`
+2.  Navigate to the firmware directory: `cd firmware`
+3.  Install the required dependencies: `cargo install espflash`
+4.  Build the project: `just build`
 
 #### Making Changes
 
 1.  Fork the repository.
-2.  Make your changes to the code.
-3.  Format your code: `just fmt`
-4.  Lint your code: `just check`
-5.  Commit your changes: `git commit -m "feat: add some feature"`
-6.  Push your changes to your fork: `git push origin my-feature-branch`
-7.  Open a pull request against the `main` branch of the original repository.
+2.  Make your changes to the code in the `firmware/` directory.
+3.  Navigate to the firmware directory: `cd firmware`
+4.  Format your code: `just fmt`
+5.  Lint your code: `just check`
+6.  Commit your changes: `git commit -m "feat: add some feature"`
+7.  Push your changes to your fork: `git push origin my-feature-branch`
+8.  Open a pull request against the `main` branch of the original repository.
 
 #### Submitting a Pull Request
 
 When you're ready to submit a pull request, please make sure you have done the following:
 
--   Your code is well-formatted (`just fmt`).
--   Your code is lint-free (`just check`).
+-   Your code is well-formatted (run `just fmt` from the `firmware/` directory).
+-   Your code is lint-free (run `just check` from the `firmware/` directory).
 -   Your commit messages are descriptive.
 -   You have updated the documentation if necessary.
 
@@ -68,4 +70,4 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0
 
 ### Rust Style
 
-We follow the official [Rust style guide](https://doc.rust-lang.org/1.0.0/style/index.html). Please run `just fmt` to format your code before submitting a pull request.
+We follow the official [Rust style guide](https://doc.rust-lang.org/1.0.0/style/index.html). Please run `just fmt` from the `firmware/` directory to format your code before submitting a pull request.

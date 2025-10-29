@@ -1,0 +1,14 @@
+{
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "linkedProjects": ["./firmware/Cargo.toml"],
+        "cargo": {
+          "features": "all",
+          "target": "riscv32imac-unknown-none-elf",
+          "allTargets": false
+        }
+      }
+    }
+  }
+}
