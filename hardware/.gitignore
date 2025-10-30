@@ -1,4 +1,5 @@
 *-backups
+*-cache*
 ~*
 
 *.kicad_prl
