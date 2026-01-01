@@ -3,6 +3,7 @@ mod state;
 use alloc::boxed::Box;
 
 use embassy_time::{Duration, Timer};
+use libm::{cosf, sinf};
 use log::{debug, error, info};
 
 pub use self::state::AppState;
@@ -10,8 +11,11 @@ use crate::{
     error::SmartknobError,
     hardware::Hardware,
     peripherals::{
-        display::{Display, graphics::Color},
-        encoder::{ANGLE_TO_DEGREES, Encoder},
+        display::{
+            Display,
+            graphics::{Color, FilledCircle},
+        },
+        encoder::{ANGLE_TO_RADIANS, Encoder},
     },
     ui::{LightView, View, ViewManager},
 };
@@ -69,12 +73,24 @@ impl App {
         info!("Starting main loop");
         loop {
             let position = self.encoder.read().await?;
+            let angle = position.value as f32 * -ANGLE_TO_RADIANS;
 
-            self.state.angle = position.angle as f32 * ANGLE_TO_DEGREES;
+            self.state.position = ((position.value as u32 * 100) / 16383) as f32;
+
+            let x = 120.0 + 105.0 * cosf(angle);
+            let y = 120.0 + 105.0 * sinf(angle);
 
             self.display.clear(Color::BLACK);
-            self.display.set_pixel(120, 120, 0xF800);
+
             self.view.select(0, &self.state, &mut self.display)?;
+
+            self.display.draw(&FilledCircle {
+                x: x as u16,
+                y: y as u16,
+                diameter: 12,
+                color: Color::WHITE,
+            })?;
+
             self.display.render().await?;
 
             Timer::after(Duration::from_millis(16)).await;

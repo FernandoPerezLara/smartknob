@@ -10,7 +10,7 @@ pub const ANGLE_TO_DEGREES: f32 = 360.0 / MAX_VALUE as f32;
 pub const ANGLE_TO_RADIANS: f32 = (2.0 * PI) / MAX_VALUE as f32;
 
 pub struct Position {
-    pub angle: u16,
+    pub value: u16,
     pub status: u8,
 }
 
@@ -32,6 +32,6 @@ impl Encoder {
         let angle = value >> 2;
         let status = (value & 0x03) as u8;
 
-        Ok(Position { angle, status })
+        Ok(Position { value: angle, status })
     }
 }

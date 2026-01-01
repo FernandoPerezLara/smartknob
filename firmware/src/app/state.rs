@@ -1,6 +1,6 @@
 #[derive(Default)]
 pub struct AppState {
-    pub angle: f32,
+    pub position: f32,
 }
 
 impl AppState {
