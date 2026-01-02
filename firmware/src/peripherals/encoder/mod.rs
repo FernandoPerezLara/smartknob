@@ -32,6 +32,9 @@ impl Encoder {
         let angle = value >> 2;
         let status = (value & 0x03) as u8;
 
-        Ok(Position { value: angle, status })
+        Ok(Position {
+            value: angle,
+            status,
+        })
     }
 }
