@@ -1,6 +1,5 @@
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use embedded_hal_async::spi::SpiBus;
-// use embassy_sync::{blocking_mutex::{raw::CriticalSectionRawMutex, Mutex}, mutex::Mutex};
 use esp_hal::{
     Async,
     dma::{AnyGdmaChannel, DmaChannelConvert, DmaChannelFor, DmaRxBuf, DmaTxBuf},

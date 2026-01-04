@@ -21,7 +21,7 @@ embedded-graphics = "0.8.1"
 
 # ESP32-specific crates
 esp-hal = { git = "https://github.com/esp-rs/esp-hal", branch = "main", features = ["esp32c6", "unstable"] }
-esp-hal-embassy = { git = "https://github.com/esp-rs/esp-hal", branch = "main", features = ["esp32c6"] }
+esp-rtos = { git = "https://github.com/esp-rs/esp-hal", branch = "main", features = ["esp32c6", "embassy", "log-04"] }
 esp-backtrace = { git = "https://github.com/esp-rs/esp-hal", branch = "main", features = ["panic-handler", "println", "esp32c6"] }
 esp-bootloader-esp-idf = { git = "https://github.com/esp-rs/esp-hal", branch = "main", features = ["esp32c6"] }
 esp-println = { git = "https://github.com/esp-rs/esp-hal", branch = "main", features = ["log-04", "esp32c6"] }

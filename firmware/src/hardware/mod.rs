@@ -3,6 +3,7 @@ pub mod spi;
 
 use esp_hal::{
     gpio::{Level, Output, OutputConfig},
+    interrupt::software::SoftwareInterruptControl,
     peripherals::Peripherals,
     spi::Mode,
     timer::systimer::SystemTimer,
@@ -33,7 +34,8 @@ impl Hardware {
         let peripherals = Self::init_peripherals()?;
 
         let timer = SystemTimer::new(peripherals.SYSTIMER);
-        esp_hal_embassy::init(timer.alarm0);
+        let software_interrupt = SoftwareInterruptControl::new(peripherals.SW_INTERRUPT);
+        esp_rtos::start(timer.alarm0, software_interrupt.software_interrupt0);
 
         debug!("Initializing shared SPI bus");
         let spi_bus = SharedSpiBus::new(
